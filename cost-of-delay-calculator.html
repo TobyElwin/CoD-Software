@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost of Delay Calculator</title>
+    <link rel="stylesheet" href="cost-of-delay-styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cost of Delay Calculator</h1>
+            <p class="subtitle">Quantify the financial impact of project delays</p>
+        </header>
+
+        <!-- Understanding Cost of Delay - Top Section -->
+        <div class="card info-section-top">
+            <h2>Understanding Cost of Delay</h2>
+            
+            <div class="intro-text">
+                <p><strong>Time has a cost. Delay is financial, but time you will never make back.</strong></p>
+                <p>Those that quantify delay identify where to focus. One thing no one can make is time. Delay is not a bottomless mystery, but an intentional impact. Not many would let $50,000 a week sit for competitor's attention. However, that is exactly what happens with delays to features and projects.</p>
+            </div>
+
+            <div class="info-grid-compact">
+                <div class="info-item">
+                    <h3>🚨 Delay Matters</h3>
+                    <p><strong>Two companies, same feature, different outcomes:</strong></p>
+                    <ul>
+                        <li><strong>Company A</strong> delivers today—wins early adopters, locks in market share, generates revenue from day one</li>
+                        <li><strong>Company B</strong> waits 3 months—customers frustrated, competitors fill the gap, higher costs</li>
+                    </ul>
+                    <p>The difference? Lost revenue and sacrificed opportunities that only competitors are too willing to fill.</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>⚡ Urgency Profiles</h3>
+                    <ul>
+                        <li><strong>Standard:</strong> Value accrues linearly over time</li>
+                        <li><strong>Expedite:</strong> High initial value, decreases rapidly</li>
+                        <li><strong>Fixed Date:</strong> Deadline-driven with severe penalties</li>
+                        <li><strong>Intangible:</strong> Low immediate value, grows over time</li>
+                    </ul>
+                </div>
+
+                <div class="info-item">
+                    <h3>💰 What is Cost of Delay?</h3>
+                    <p>CoD estimates the financial impact of delay. It represents the value lost over time due to project delays—not just direct expenses but also revenue erosion, missed opportunities, and weakened competitive positioning.</p>
+                    <p class="highlight">Ignoring CoD leads to poor prioritization. Without CoD, teams focus on projects that "feel urgent" rather than those with sooner financial impact.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Helper Text -->
+        <div class="helper-text">
+            <p>💡 <strong>Complete the fields below, then click Calculate.</strong> Output and analysis will display below the calculator.</p>
+        </div>
+
+        <!-- Four Column Layout Container -->
+        <div class="four-column-container">
+            <!-- Column 1: Project/Product Information -->
+            <div class="card input-section-full">
+                <div class="input-grid">
+                <!-- Left Column: Project/Product Information -->
+                <div class="input-column">
+                    <h2>Project/Product Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="projectName">
+                            Project Name
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">A descriptive name for your project or initiative</span>
+                            </span>
+                        </label>
+                        <input type="text" id="projectName" placeholder="Enter project name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetLaunchDate">
+                            Target Launch Date <span class="optional-label">(Optional)</span>
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Original planned launch date for this project</span>
+                            </span>
+                        </label>
+                        <input type="text" id="targetLaunchDate" placeholder="MM-DD-YYYY" maxlength="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="revisedLaunchDate">
+                            Revised Launch Date <span class="optional-label">(Optional)</span>
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Updated launch date due to delays</span>
+                            </span>
+                        </label>
+                        <input type="text" id="revisedLaunchDate" placeholder="MM-DD-YYYY" maxlength="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weeklyValue">
+                            Expected Revenue or Cost Savings Per Week ($)
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Expected revenue gain or cost savings per week once delivered</span>
+                            </span>
+                        </label>
+                        <input type="number" id="weeklyValue" placeholder="0" min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="developmentWeeks">
+                            Development Duration (weeks)
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Estimated time to complete development and deliver value</span>
+                            </span>
+                        </label>
+                        <input type="number" id="developmentWeeks" placeholder="0" min="1" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="delayWeeks">
+                            Delay Period (weeks)
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Number of weeks the project is currently delayed or at risk of delay</span>
+                            </span>
+                        </label>
+                        <input type="number" id="delayWeeks" placeholder="0" min="0" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="urgencyProfile">
+                            Urgency Profile
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">How value changes over time: Linear, Decreasing, Deadline-based, or Growing</span>
+                            </span>
+                        </label>
+                        <select id="urgencyProfile">
+                            <option value="standard">Standard (Linear)</option>
+                            <option value="expedite">Expedite (High urgency)</option>
+                            <option value="fixed-date">Fixed Date (Deadline)</option>
+                            <option value="intangible">Intangible (Low urgency)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column: Team Cost Parameters -->
+                <div class="input-column">
+                    <h2>Team Cost Parameters</h2>
+
+                    <div class="form-group">
+                        <label for="salaryType">
+                            Salary Input Type
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Choose whether to enter annual salary or hourly rate</span>
+                            </span>
+                        </label>
+                        <select id="salaryType">
+                            <option value="annual">Annual Salary</option>
+                            <option value="hourly">Hourly Rate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="annualSalaryGroup">
+                        <label for="annualSalary">
+                            Average Annual Salary ($)
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Average base annual salary per team member (before benefits)</span>
+                            </span>
+                        </label>
+                        <input type="number" id="annualSalary" placeholder="0" min="0" step="1000">
+                    </div>
+
+                    <div class="form-group" id="hourlyRateGroup" style="display: none;">
+                        <label for="hourlyRate">
+                            Average Hourly Rate ($)
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Average base hourly rate per team member (before benefits)</span>
+                            </span>
+                        </label>
+                        <input type="number" id="hourlyRate" placeholder="0" min="0" step="0.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teamSize">
+                            Number of Team Members
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Total number of people working on this project</span>
+                            </span>
+                        </label>
+                        <input type="number" id="teamSize" placeholder="0" min="0" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="benefitsMultiplier">
+                            FTE Fully Loaded Cost
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Multiplier to account for benefits, insurance, taxes, and overhead (typically 1.2x to 2.0x)</span>
+                            </span>
+                        </label>
+                        <input type="number" id="benefitsMultiplier" value="1.5" min="1" max="3" step="0.1">
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Column 3: Estimate -->
+            <div class="card estimate-section">
+            <h2>Estimate</h2>
+            <div class="estimate-content">
+                <p class="estimate-prompt">Complete the fields and click the button below to calculate the cost of delay.</p>
+                
+                <button id="calculateBtn" class="btn-primary btn-large">Estimate Cost of Delay</button>
+                
+                <div id="estimateActions" style="display: none;">
+                    <button id="addToComparisonBtn" class="btn-secondary btn-full">Add to Comparison</button>
+                    <button id="saveAsBtn" class="btn-secondary btn-full">Save As...</button>
+                    <button id="loadFromFileBtn" class="btn-secondary btn-full">Load From File</button>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;">
+                </div>
+                
+                <div id="quickStats" class="quick-stats" style="display: none;">
+                    <h3>Quick Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total CoD:</span>
+                        <span class="stat-value" id="quickCod">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">CD3 Priority:</span>
+                        <span class="stat-value" id="quickCd3">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Economic Impact:</span>
+                        <span class="stat-value" id="quickImpact">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 4: Cost of Delay Analysis -->
+            <div class="card results-section">
+                <div class="results-header">
+                    <h2>Cost of Delay Analysis</h2>
+                    <div class="header-actions" id="headerActions" style="display: none;">
+                        <div class="dropdown">
+                            <button class="btn-action" id="exportDropdownBtn">Export ▼</button>
+                            <div class="dropdown-content" id="exportDropdown">
+                                <a href="#" id="exportCsvBtn">Export as CSV</a>
+                                <a href="#" id="exportExcelBtn">Export as Excel (.xls)</a>
+                                <a href="#" id="exportJsonBtn">Export as JSON</a>
+                            </div>
+                        </div>
+                        <button class="btn-action" id="generateImagesBtn">Generate Images</button>
+                    </div>
+                </div>
+                
+                <div id="results" class="results-content">
+                    <p class="placeholder">Enter project details and click Calculate to see results</p>
+                </div>
+
+                <div id="cdppSection" class="cdpp-section" style="display: none;">
+                    <h3>CD3 - Cost of Delay Divided by Duration</h3>
+                    <div class="cdpp-value"></div>
+                    <p class="cdpp-explanation">This metric helps prioritize projects. Higher CD3 = Higher Priority</p>
+                </div>
+
+                <div id="employeeCostSection" class="employee-cost-section" style="display: none;">
+                    <h3>Employee Cost Analysis</h3>
+                    <div class="employee-metrics"></div>
+                </div>
+
+                <!-- Executive Perspectives -->
+                <div id="executivePerspectives" class="executive-perspectives" style="display: none;">
+                    <h3>Executive Impact Analysis</h3>
+                    <div class="executive-tabs">
+                        <button class="executive-tab active" data-tab="cfo">CFO Perspective</button>
+                        <button class="executive-tab" data-tab="cmo">CMO Perspective</button>
+                        <button class="executive-tab" data-tab="coo">COO Perspective</button>
+                    </div>
+
+                    <div id="cfo-content" class="executive-content active">
+                        <h3>Chief Financial Officer Perspective</h3>
+                        <div id="cfo-analysis"></div>
+                    </div>
+
+                    <div id="cmo-content" class="executive-content">
+                        <h3>Chief Marketing Officer Perspective</h3>
+                        <div id="cmo-analysis"></div>
+                    </div>
+
+                    <div id="coo-content" class="executive-content">
+                        <h3>Chief Operations Officer Perspective</h3>
+                        <div id="coo-analysis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Four Column Container -->
+
+        <!-- Note about output location (Mobile/Tablet only) -->
+        <div class="output-note" id="outputNote" style="display: none;">
+            <p>📊 <strong>Analysis, suggestions, and visualizations display below</strong></p>
+        </div>
+
+        <!-- Visualization Section -->
+        <div class="card visualization-section" id="chartSection" style="display: none;">
+            <h2>Cost of Delay Over Time</h2>
+            <canvas id="delayChart"></canvas>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="card comparison-section" id="comparisonSection" style="display: none;">
+            <div class="comparison-header">
+                <h2>Project Comparison</h2>
+                <button id="clearComparisonBtn" class="btn-small">Clear All</button>
+            </div>
+            <div id="comparisonTable"></div>
+            <div class="comparison-chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Additional Information Section -->
+        <div class="card info-section">
+            <h2>Additional Resources</h2>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <h3>🎯 CD3 Prioritization</h3>
+                    <p>CD3 (Cost of Delay Divided by Duration) helps prioritize work using <strong>Weighted Shortest Job First (WSJF)</strong> methodology. It identifies projects that deliver the most value per unit of time invested.</p>
+                    <p>Higher CD3 = Higher Priority = Faster ROI</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>⚠️ Cost of Confusion</h3>
+                    <p><strong>Common delays stem from:</strong></p>
+                    <ul>
+                        <li><strong>Unclear Prioritization:</strong> Teams debate instead of execute</li>
+                        <li><strong>Scope Creep:</strong> Changing requirements extend delivery time</li>
+                        <li><strong>Task Switching:</strong> Multitasking increases lead time 20%+</li>
+                    </ul>
+                    <p class="highlight">Fix: Limit Work in Progress (WIP), enforce scope discipline, use flow metrics</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>✅ Take Action</h3>
+                    <p><strong>Minimize delay by:</strong></p>
+                    <ul>
+                        <li><strong>Prioritizing High-Value Work:</strong> Focus where speed impacts revenue</li>
+                        <li><strong>Quantifying Impact:</strong> Assign dollar value to each week of delay</li>
+                        <li><strong>Optimizing Flow:</strong> Eliminate slow decisions and overburdened teams</li>
+                    </ul>
+                    <p>Companies like Netflix, Toyota, and Uber treat speed to market as a competitive advantage. They ask: "What will it cost us every week this isn't providing customer value?"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="cost-of-delay-calculator.js"></script>
+</body>
+</html>

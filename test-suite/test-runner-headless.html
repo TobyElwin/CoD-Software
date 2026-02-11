@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cost of Delay - Test Runner (Headless)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine.min.css">
+</head>
+<body>
+    <!-- Minimal DOM required by calculator and acceptance tests -->
+    <input type="text" id="projectName">
+    <input type="text" id="targetLaunchDate">
+    <input type="text" id="revisedLaunchDate">
+    <input type="number" id="weeklyValue">
+    <input type="number" id="developmentWeeks">
+    <input type="number" id="delayWeeks">
+    <select id="urgencyProfile"><option value="standard">Standard</option></select>
+    <select id="salaryType"><option value="annual">Annual</option><option value="hourly">Hourly</option></select>
+    <div id="annualSalaryGroup" style="display: block;"><input id="annualSalary" type="number"></div>
+    <div id="hourlyRateGroup" style="display: none;"><input id="hourlyRate" type="number"></div>
+    <input type="number" id="teamSize">
+    <input type="number" id="benefitsMultiplier" value="1.5">
+    <button id="calculateBtn">Calculate</button>
+    <button id="addToComparisonBtn">Add</button>
+    <a href="#" id="exportCsvBtn">CSV</a>
+    <a href="#" id="exportExcelBtn">Excel</a>
+    <a href="#" id="exportJsonBtn">JSON</a>
+    <button id="generateImagesBtn">Images</button>
+    <button id="saveAsBtn">Save</button>
+    <button id="loadFromFileBtn">Load</button>
+    <input type="file" id="fileInput" style="display:none">
+    <div id="comparisonSection" style="display: none;">
+        <div id="comparisonTable"></div>
+        <canvas id="comparisonChart"></canvas>
+    </div>
+    <button id="clearComparisonBtn">Clear</button>
+    <span class="tooltip">ⓘ<span class="tooltiptext">Expected revenue gain or cost savings per week once delivered</span></span>
+    <!-- Scripts injected by run-tests.js in order: calculator, Chart, jasmine, boot, specs -->
+</body>
+</html>

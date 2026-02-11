@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test - CoD Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        h1 { color: #2563eb; margin-bottom: 10px; }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 4px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pass { border-left-color: #10b981; background: #d1fae5; }
+        .fail { border-left-color: #ef4444; background: #fee2e2; }
+        .pending { border-left-color: #f59e0b; background: #fef3c7; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover { background: #1e40af; }
+        button.test-btn { background: #10b981; }
+        button.test-btn:hover { background: #059669; }
+        .status { font-weight: bold; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+        .pass .status { background: #10b981; color: white; }
+        .fail .status { background: #ef4444; color: white; }
+        .pending .status { background: #f59e0b; color: white; }
+        code { background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+        .summary {
+            background: linear-gradient(135deg, #bfdbfe, #ddd6fe);
+            padding: 20px;
+            border-radius: 8px;
+            border: 3px solid #2563eb;
+            margin-top: 20px;
+        }
+        .summary h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Button Functionality Test Suite</h1>
+    <p>Testing all 9 action buttons in the Cost of Delay Calculator</p>
+    
+    <div class="test-section">
+        <h2>Quick Actions</h2>
+        <button onclick="openCalculator()">🚀 Open Calculator</button>
+        <button onclick="runAllTests()">▶️ Run All Button Tests</button>
+        <button onclick="location.reload()">🔄 Reset</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Button Tests</h2>
+        <div id="buttonTests">
+            <div class="test-item pending">
+                <div>
+                    <strong>1. Estimate Cost of Delay</strong>
+                    <br><code>#calculateBtn</code> - Primary calculation button
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('calculateBtn', 1)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>2. Add to Comparison</strong>
+                    <br><code>#addToComparisonBtn</code> - Adds project to comparison table
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('addToComparisonBtn', 2)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>3. Save As...</strong>
+                    <br><code>#saveAsBtn</code> - Saves project state to JSON file
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('saveAsBtn', 3)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>4. Load From File</strong>
+                    <br><code>#loadFromFileBtn</code> - Loads saved project from JSON
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('loadFromFileBtn', 4)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>5. Export CSV</strong>
+                    <br><code>#exportCsvBtn</code> - Exports data to CSV format
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('exportCsvBtn', 5)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>6. Export Excel</strong>
+                    <br><code>#exportExcelBtn</code> - Exports to Excel (.xls)
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('exportExcelBtn', 6)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>7. Export JSON</strong>
+                    <br><code>#exportJsonBtn</code> - Exports to JSON format
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('exportJsonBtn', 7)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>8. Generate Images</strong>
+                    <br><code>#generateImagesBtn</code> - Generates image from results
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('generateImagesBtn', 8)">Test</button>
+                </div>
+            </div>
+            
+            <div class="test-item pending">
+                <div>
+                    <strong>9. Clear Comparison</strong>
+                    <br><code>#clearComparisonBtn</code> - Clears all comparison projects
+                </div>
+                <div>
+                    <span class="status">PENDING</span>
+                    <button class="test-btn" onclick="testButton('clearComparisonBtn', 9)">Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary" id="summary" style="display: none;">
+        <h2>✅ Test Summary</h2>
+        <p id="summaryText"></p>
+    </div>
+
+    <script>
+        let testResults = Array(9).fill(null);
+        let calculatorWindow = null;
+
+        function openCalculator() {
+            calculatorWindow = window.open('cost-of-delay-calculator.html', 'calculator');
+            alert('Calculator opened in new window.\n\nInstructions:\n1. Fill in sample data\n2. Click "Estimate Cost of Delay"\n3. Return here and click "Run All Button Tests"');
+        }
+
+        function testButton(buttonId, index) {
+            alert(`Testing Button ${index}: ${buttonId}\n\nManual Test Steps:\n1. Ensure calculator is open\n2. Fill in required fields if needed\n3. Click "${buttonId.replace('Btn', '')}" in calculator\n4. Observe the behavior\n\nExpected: Button should trigger its function without errors\n\nDid the button work correctly?`);
+            
+            const result = confirm('Did the button function correctly?');
+            testResults[index - 1] = result;
+            
+            const testItems = document.querySelectorAll('.test-item');
+            const item = testItems[index - 1];
+            
+            if (result) {
+                item.className = 'test-item pass';
+                item.querySelector('.status').textContent = 'PASS';
+                item.querySelector('.status').className = 'status';
+            } else {
+                item.className = 'test-item fail';
+                item.querySelector('.status').textContent = 'FAIL';
+                item.querySelector('.status').className = 'status';
+            }
+            
+            updateSummary();
+        }
+
+        function runAllTests() {
+            if (!calculatorWindow || calculatorWindow.closed) {
+                alert('Please open the calculator first using the "Open Calculator" button.');
+                return;
+            }
+            
+            const instructions = 'Automated Test Sequence:\n\n' +
+                '1. Estimate Cost of Delay - Primary calculation\n' +
+                '2. Add to Comparison - After calculation\n' +
+                '3. Save As... - Save project state\n' +
+                '4. Load From File - Restore state\n' +
+                '5-7. Export buttons - CSV, Excel, JSON\n' +
+                '8. Generate Images - Create visuals\n' +
+                '9. Clear Comparison - Reset list\n\n' +
+                'You will test each button individually.\n\nReady to begin?';
+                
+            if (confirm(instructions)) {
+                for (let i = 1; i <= 9; i++) {
+                    const buttons = ['calculateBtn', 'addToComparisonBtn', 'saveAsBtn', 'loadFromFileBtn',
+                                   'exportCsvBtn', 'exportExcelBtn', 'exportJsonBtn', 'generateImagesBtn',
+                                   'clearComparisonBtn'];
+                    setTimeout(() => testButton(buttons[i-1], i), (i-1) * 500);
+                }
+            }
+        }
+
+        function updateSummary() {
+            const total = testResults.length;
+            const tested = testResults.filter(r => r !== null).length;
+            const passed = testResults.filter(r => r === true).length;
+            const failed = testResults.filter(r => r === false).length;
+            
+            if (tested > 0) {
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('summaryText').innerHTML = `
+                    <strong>Progress:</strong> ${tested}/${total} buttons tested<br>
+                    <strong>Passed:</strong> ${passed} ✅<br>
+                    <strong>Failed:</strong> ${failed} ❌<br>
+                    <strong>Success Rate:</strong> ${tested > 0 ? Math.round((passed/tested)*100) : 0}%
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

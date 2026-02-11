@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .test { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        button { padding: 12px 24px; margin: 5px; font-size: 14px; cursor: pointer; }
+        .primary { background: #2563eb; color: white; border: none; border-radius: 6px; }
+        .secondary { background: #10b981; color: white; border: none; border-radius: 6px; }
+        .result { padding: 10px; margin: 10px 0; background: #fef3c7; border-left: 4px solid #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Simple Button Test</h1>
+    
+    <div class="test">
+        <h2>Test 1: Basic Button Click</h2>
+        <button class="primary" onclick="alert('Button 1 works!')">Click Me - Test 1</button>
+    </div>
+
+    <div class="test">
+        <h2>Test 2: Button with ID and addEventListener</h2>
+        <button id="test2Btn" class="primary">Click Me - Test 2</button>
+        <div id="test2Result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test">
+        <h2>Test 3: Calculator Calculate Button (Copied)</h2>
+        <button id="calculateBtn" class="btn-primary btn-large">Estimate Cost of Delay</button>
+        <div id="test3Result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test">
+        <h2>Test 4: Open Real Calculator</h2>
+        <button class="secondary" onclick="window.open('cost-of-delay-calculator.html', '_blank')">Open Calculator</button>
+        <p><strong>Instructions:</strong> Open browser console (F12), look for error messages</p>
+    </div>
+
+    <div class="test">
+        <h2>Console Log</h2>
+        <div id="consoleLog" style="background: #1e293b; color: #10b981; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        // Override console.log to display in page
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logDiv = document.getElementById('consoleLog');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logDiv.innerHTML += '<div style="color: #10b981;">✓ ' + args.join(' ') + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logDiv.innerHTML += '<div style="color: #ef4444;">✗ ' + args.join(' ') + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        console.log('Page loaded');
+
+        // Test 2: addEventListener
+        const test2Btn = document.getElementById('test2Btn');
+        if (test2Btn) {
+            console.log('Test 2 button found');
+            test2Btn.addEventListener('click', () => {
+                const result = document.getElementById('test2Result');
+                result.style.display = 'block';
+                result.innerHTML = '✅ Test 2 button clicked! addEventListener works!';
+                console.log('Test 2 button clicked');
+            });
+        } else {
+            console.error('Test 2 button NOT found');
+        }
+
+        // Test 3: Calculator button simulation
+        const calcBtn = document.getElementById('calculateBtn');
+        if (calcBtn) {
+            console.log('Calculate button found');
+            calcBtn.addEventListener('click', () => {
+                const result = document.getElementById('test3Result');
+                result.style.display = 'block';
+                result.innerHTML = '✅ Calculate button clicked! This proves the button ID and addEventListener work!';
+                console.log('Calculate button clicked');
+            });
+        } else {
+            console.error('Calculate button NOT found');
+        }
+
+        // Simulate calculator initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            console.log('Testing if CostOfDelayCalculator class would initialize...');
+            
+            // Check for all button IDs
+            const buttonIds = [
+                'calculateBtn',
+                'addToComparisonBtn',
+                'saveAsBtn',
+                'loadFromFileBtn',
+                'exportCsvBtn',
+                'exportExcelBtn',
+                'exportJsonBtn',
+                'generateImagesBtn',
+                'clearComparisonBtn'
+            ];
+            
+            console.log('Checking for button IDs in THIS page:');
+            buttonIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    console.log(`  ✓ ${id} found`);
+                } else {
+                    console.error(`  ✗ ${id} NOT found`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

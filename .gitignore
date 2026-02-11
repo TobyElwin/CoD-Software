@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# System Files
+.DS_Store
+.cursor/
+
+# Temporary Files
+*.log
+*.tmp
+tmp_*
+test-output.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs (if any)
+dist/
+build/
