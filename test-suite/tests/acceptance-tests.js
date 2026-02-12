@@ -8,6 +8,13 @@
  * - Reliability, Interoperability, Scalability, Observability (RISO)
  */
 
+import { CostOfDelayCalculator } from '../../cost-of-delay-calculator.js';
+
+// ensure global reference for older code
+if (typeof globalThis !== 'undefined' && !globalThis.CostOfDelayCalculator) {
+    globalThis.CostOfDelayCalculator = CostOfDelayCalculator;
+}
+
 describe('Cost of Delay Calculator - Acceptance Tests', () => {
     let calculator;
     const CostOfDelayCalculatorClass = typeof CostOfDelayCalculator !== 'undefined' ? CostOfDelayCalculator : (typeof window !== 'undefined' && window.CostOfDelayCalculator) || (typeof globalThis !== 'undefined' && globalThis.CostOfDelayCalculator);

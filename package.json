@@ -11,6 +11,7 @@
     "start": "node test-suite/open-app.js",
     "bdd:smoke": "cucumber-js"
   },
+  "type": "module",
   "private": true,
   "devDependencies": {
     "@cucumber/cucumber": "^12.6.0",

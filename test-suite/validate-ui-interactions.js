@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /** Smoke validation for key module interactions on the real HTML interface. */
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -49,7 +53,8 @@ function fail(message) {
 async function run(port) {
   let puppeteer;
   try {
-    puppeteer = require('puppeteer');
+    puppeteer = await import('puppeteer');
+    puppeteer = puppeteer.default || puppeteer;
   } catch (_) {
     fail('Puppeteer is not installed. Run npm install.');
   }

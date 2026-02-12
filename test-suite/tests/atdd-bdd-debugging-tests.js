@@ -6,6 +6,12 @@
  * - Validate key behavior paths before manual UI debugging.
  */
 
+import { CostOfDelayCalculator } from '../../cost-of-delay-calculator.js';
+
+if (typeof globalThis !== 'undefined' && !globalThis.CostOfDelayCalculator) {
+    globalThis.CostOfDelayCalculator = CostOfDelayCalculator;
+}
+
 describe('ATDD/BDD Debugging Standards - Core Scenarios', () => {
     let calculator;
     const CalculatorClass = typeof CostOfDelayCalculator !== 'undefined'

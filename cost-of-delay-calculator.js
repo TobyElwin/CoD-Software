@@ -1,6 +1,14 @@
 // Cost of Delay Calculator - JavaScript Logic
 
-class CostOfDelayCalculator {
+// paired-down class now delegates major operations to helper modules
+import { calculateEmployeeCosts, calculateCostOfDelay } from './src/calculations.js';
+import { formatCurrency, formatCurrencyDetailed } from './src/formatters.js';
+import { exportJson as exportJsonHelper, exportCsv as exportCsvHelper, exportExcel as exportExcelHelper, exportExecutiveAnalysis as exportExecutiveHelper } from './src/exporters.js';
+import { saveAs as saveAsHelper, loadFromFile as loadFromFileHelper, handleFileLoad as handleFileLoadHelper } from './src/fileIO.js';
+import { createDelayChart as createDelayChartHelper, createComparisonChart as createComparisonChartHelper } from './src/ui/charts.js';
+import { updateComparisonView as updateComparisonViewHelper, createComparisonTable as createComparisonTableHelper } from './src/ui/comparisonView.js';
+
+export class CostOfDelayCalculator {
     constructor() {
         console.log('📊 Constructing CostOfDelayCalculator...');
         this.chart = null;
@@ -246,7 +254,8 @@ class CostOfDelayCalculator {
         }
 
         // Calculate employee costs
-        const employeeCosts = this.calculateEmployeeCosts(
+        // delegate to calculation module
+        const employeeCosts = calculateEmployeeCosts(
             annualSalary,
             teamSize,
             benefitsMultiplier,
@@ -255,7 +264,7 @@ class CostOfDelayCalculator {
         );
 
         // Calculate Cost of Delay metrics
-        const results = this.calculateCostOfDelay(
+        const results = calculateCostOfDelay(
             weeklyValue,
             developmentWeeks,
             delayWeeks,
@@ -331,51 +340,7 @@ class CostOfDelayCalculator {
     }
 
     saveAs() {
-        if (!this.currentResults) {
-            alert('Please calculate a project first');
-            return;
-        }
-
-        // Prompt for filename
-        const defaultFilename = `cod-${this.currentResults.projectName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}`;
-        const filename = prompt('Enter filename (without extension):', defaultFilename);
-        
-        if (!filename) return; // User cancelled
-
-        // Create comprehensive save data
-        const saveData = {
-            savedDate: new Date().toISOString(),
-            projectData: this.currentResults,
-            inputs: {
-                projectName: document.getElementById('projectName').value,
-                weeklyValue: document.getElementById('weeklyValue').value,
-                developmentWeeks: document.getElementById('developmentWeeks').value,
-                delayWeeks: document.getElementById('delayWeeks').value,
-                urgencyProfile: document.getElementById('urgencyProfile').value,
-                targetLaunchDate: document.getElementById('targetLaunchDate').value,
-                revisedLaunchDate: document.getElementById('revisedLaunchDate').value,
-                salaryType: document.getElementById('salaryType').value,
-                annualSalary: document.getElementById('annualSalary').value,
-                hourlyRate: document.getElementById('hourlyRate').value,
-                teamSize: document.getElementById('teamSize').value,
-                benefitsMultiplier: document.getElementById('benefitsMultiplier').value
-            },
-            comparisonProjects: this.comparisonProjects
-        };
-
-        // Save as JSON
-        const jsonStr = JSON.stringify(saveData, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        alert(`✅ Saved as ${filename}.json\n\n📁 Complete state saved including:\n• All input values\n• Calculation results\n• Comparison projects\n• Timestamps\n\nYou can load this file later using the "Load From File" button.`);
+        saveAsHelper(this.currentResults);
     }
 
     loadFromFile() {
@@ -383,190 +348,39 @@ class CostOfDelayCalculator {
     }
 
     handleFileLoad(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                // Validate data structure
-                if (!data.inputs || !data.projectData) {
-                    alert('Invalid file format. Please select a valid Cost of Delay save file.');
-                    return;
-                }
-
-                // Restore all input fields
-                document.getElementById('projectName').value = data.inputs.projectName || '';
-                document.getElementById('weeklyValue').value = data.inputs.weeklyValue || '';
-                document.getElementById('developmentWeeks').value = data.inputs.developmentWeeks || '';
-                document.getElementById('delayWeeks').value = data.inputs.delayWeeks || '';
-                document.getElementById('urgencyProfile').value = data.inputs.urgencyProfile || 'standard';
-                document.getElementById('targetLaunchDate').value = data.inputs.targetLaunchDate || '';
-                document.getElementById('revisedLaunchDate').value = data.inputs.revisedLaunchDate || '';
-                document.getElementById('salaryType').value = data.inputs.salaryType || 'annual';
-                document.getElementById('annualSalary').value = data.inputs.annualSalary || '';
-                document.getElementById('hourlyRate').value = data.inputs.hourlyRate || '';
-                document.getElementById('teamSize').value = data.inputs.teamSize || '';
-                document.getElementById('benefitsMultiplier').value = data.inputs.benefitsMultiplier || 1.5;
-
-                // Toggle salary input visibility
+        // delegate parsing to helper and restore state in callback
+        handleFileLoadHelper(event, (data) => {
+            // restore UI fields if inputs present
+            if (data.inputs) {
+                Object.entries(data.inputs).forEach(([id,val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
                 this.toggleSalaryInput();
-
-                // Restore comparison projects if any
-                if (data.comparisonProjects && data.comparisonProjects.length > 0) {
-                    this.comparisonProjects = data.comparisonProjects;
-                    this.updateComparisonView();
-                }
-
-                // Auto-calculate to restore results
-                this.calculate();
-
-                const savedDate = new Date(data.savedDate).toLocaleString();
-                alert(`✅ File loaded successfully!\n\n📅 Saved: ${savedDate}\n📊 Project: ${data.inputs.projectName}\n\nAll inputs and calculations have been restored.`);
-
-            } catch (error) {
-                alert('❌ Error loading file. Please ensure it is a valid Cost of Delay save file.\n\nError: ' + error.message);
             }
-        };
-
-        reader.readAsText(file);
-        
-        // Reset file input so the same file can be loaded again if needed
-        event.target.value = '';
+            if (data.comparisonProjects && data.comparisonProjects.length > 0) {
+                this.comparisonProjects = data.comparisonProjects;
+                this.updateComparisonView();
+            }
+            if (data.projectData) {
+                this.currentResults = data.projectData;
+            }
+            if (data.savedDate) {
+                const savedDate = new Date(data.savedDate).toLocaleString();
+                alert(`✅ File loaded successfully!\n\n📅 Saved: ${savedDate}\n\nAll inputs and calculations have been restored.`);
+            }
+            // recalc
+            this.calculate();
+        });
     }
 
     calculateEmployeeCosts(annualSalary, teamSize, benefitsMultiplier, developmentWeeks, delayWeeks) {
-        if (annualSalary <= 0 || teamSize <= 0) {
-            return {
-                hasEmployeeCosts: false
-            };
-        }
-
-        // Calculate true cost with benefits
-        const trueCostPerPerson = annualSalary * benefitsMultiplier;
-        
-        // Calculate various time-based costs
-        const hourlyRate = trueCostPerPerson / 2080; // Standard 2080 work hours per year
-        const dailyRate = hourlyRate * 8; // 8-hour workday
-        const weeklyRate = trueCostPerPerson / 52; // 52 weeks per year
-        
-        // Calculate team costs
-        const teamDailyCost = dailyRate * teamSize;
-        const teamWeeklyCost = weeklyRate * teamSize;
-        
-        // Calculate project costs
-        const totalDevelopmentCost = teamWeeklyCost * developmentWeeks;
-        const totalDelayCost = teamWeeklyCost * delayWeeks;
-        const totalProjectCost = totalDevelopmentCost + totalDelayCost;
-        
-        // Calculate cost per week of delay
-        const costPerWeekDelay = teamWeeklyCost;
-
-        return {
-            hasEmployeeCosts: true,
-            annualSalary,
-            teamSize,
-            benefitsMultiplier,
-            trueCostPerPerson,
-            hourlyRate,
-            dailyRate,
-            weeklyRate,
-            teamDailyCost,
-            teamWeeklyCost,
-            totalDevelopmentCost,
-            totalDelayCost,
-            totalProjectCost,
-            costPerWeekDelay
-        };
+        // simple proxy for the calculations module
+        return calculateEmployeeCosts(annualSalary, teamSize, benefitsMultiplier, developmentWeeks, delayWeeks);
     }
 
     calculateCostOfDelay(weeklyValue, developmentWeeks, delayWeeks, urgencyProfile) {
-        const validProfiles = ['standard', 'expedite', 'fixed-date', 'intangible'];
-        if (typeof urgencyProfile !== 'string' || !validProfiles.includes(urgencyProfile)) {
-            throw new Error('Invalid urgency profile: "' + urgencyProfile + '". Must be one of: ' + validProfiles.join(', '));
-        }
-        if (Number(weeklyValue) < 0 || Number(developmentWeeks) < 0 || Number(delayWeeks) < 0) {
-            throw new Error('weeklyValue, developmentWeeks, and delayWeeks must be non-negative');
-        }
-        let totalCostOfDelay = 0;
-        let peakWeeklyLoss = 0;
-        let weeklyLosses = [];
-
-        // Calculate based on urgency profile
-        switch (urgencyProfile) {
-            case 'standard':
-                // Linear - consistent value per week
-                totalCostOfDelay = weeklyValue * delayWeeks;
-                peakWeeklyLoss = weeklyValue;
-                for (let i = 0; i < delayWeeks; i++) {
-                    weeklyLosses.push(weeklyValue);
-                }
-                break;
-
-            case 'expedite':
-                // High urgency - exponential decay (higher cost early)
-                for (let i = 0; i < delayWeeks; i++) {
-                    const weeklyLoss = weeklyValue * Math.exp(-i / (delayWeeks || 1) * 0.5);
-                    weeklyLosses.push(weeklyLoss);
-                    totalCostOfDelay += weeklyLoss;
-                }
-                peakWeeklyLoss = weeklyLosses[0] || 0;
-                break;
-
-            case 'fixed-date':
-                // Fixed deadline - all value lost after certain point
-                const deadlineWeek = Math.floor(delayWeeks * 0.7); // 70% through is deadline
-                for (let i = 0; i < delayWeeks; i++) {
-                    if (i < deadlineWeek) {
-                        weeklyLosses.push(weeklyValue * 0.5); // Reduced value but still some
-                    } else {
-                        weeklyLosses.push(weeklyValue * 2); // Double penalty after deadline
-                    }
-                    totalCostOfDelay += weeklyLosses[i];
-                }
-                peakWeeklyLoss = weeklyValue * 2;
-                break;
-
-            case 'intangible':
-                // Low urgency - value grows over time
-                for (let i = 0; i < delayWeeks; i++) {
-                    const weeklyLoss = weeklyValue * (0.3 + (i / delayWeeks) * 0.7);
-                    weeklyLosses.push(weeklyLoss);
-                    totalCostOfDelay += weeklyLoss;
-                }
-                peakWeeklyLoss = weeklyLosses[weeklyLosses.length - 1] || 0;
-                break;
-        }
-
-        // Calculate CD3 (Cost of Delay Divided by Duration)
-        const cd3 = totalCostOfDelay / developmentWeeks;
-
-        // Calculate opportunity cost
-        const totalProjectValue = weeklyValue * 52; // Annualized
-        const opportunityCost = (totalCostOfDelay / totalProjectValue) * 100;
-
-        // Calculate payback period impact
-        const normalPaybackWeeks = developmentWeeks;
-        const delayedPaybackWeeks = developmentWeeks + delayWeeks;
-        const additionalPaybackTime = delayWeeks;
-
-        return {
-            totalCostOfDelay,
-            cd3,
-            peakWeeklyLoss,
-            weeklyLosses,
-            opportunityCost,
-            weeklyValue,
-            developmentWeeks,
-            delayWeeks,
-            urgencyProfile,
-            normalPaybackWeeks,
-            delayedPaybackWeeks,
-            additionalPaybackTime,
-            totalProjectValue
-        };
+        return calculateCostOfDelay(weeklyValue, developmentWeeks, delayWeeks, urgencyProfile);
     }
 
     displayResults(projectName, results) {
@@ -574,37 +388,8 @@ class CostOfDelayCalculator {
         const cdppSection = document.getElementById('cdppSection');
         const employeeCostSection = document.getElementById('employeeCostSection');
 
-        // Format currency - negative values in parentheses and red
-        const formatCurrency = (value) => {
-            const absValue = Math.abs(value);
-            const formatted = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(absValue);
-            
-            if (value < 0) {
-                return `<span class="negative-value">${formatted}</span>`;
-            }
-            return formatted;
-        };
-
-        // Format currency with decimals for hourly rates
-        const formatCurrencyDetailed = (value) => {
-            const absValue = Math.abs(value);
-            const formatted = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(absValue);
-            
-            if (value < 0) {
-                return `<span class="negative-value">${formatted}</span>`;
-            }
-            return formatted;
-        };
+        // format helpers imported at module level
+        // (formatCurrency and formatCurrencyDetailed are available)
 
         // Calculate total economic impact if employee costs are available
         let totalEconomicImpact = results.totalCostOfDelay;
@@ -1001,39 +786,7 @@ class CostOfDelayCalculator {
     }
 
     exportExecutiveAnalysis() {
-        try {
-            const parts = [];
-            const header = `Executive Combined Analysis - ${new Date().toLocaleString()}\nProject: ${this.currentResults ? this.currentResults.projectName : 'N/A'}\n\n`;
-            parts.push(header);
-
-            const overview = document.getElementById('overviewContent');
-            if (overview) parts.push('Overview:\n' + overview.innerText + '\n\n');
-
-            const ids = ['ceo-analysis','cfo-analysis','cmo-analysis','cto-analysis','coo-analysis'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    const title = el.closest('.executive-content')?.querySelector('h3')?.textContent || id;
-                    parts.push((title ? title + ':\n' : '') + el.innerText + '\n\n');
-                }
-            });
-
-            const text = parts.join('\n');
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `executive-analysis-${(this.currentResults && this.currentResults.projectName ? this.currentResults.projectName.replace(/\s+/g,'-') : 'analysis')}-${Date.now()}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert('✅ Executive analysis exported');
-            return text;
-        } catch (e) {
-            console.error('Error exporting executive analysis:', e);
-            alert('❌ Error exporting executive analysis. Check console for details.');
-        }
+        return exportExecutiveHelper(this.currentResults);
     }
 
     switchExecutiveTab(tabName) {
@@ -1051,98 +804,7 @@ class CostOfDelayCalculator {
     }
 
     createChart(results) {
-        const chartSection = document.getElementById('chartSection');
-        chartSection.style.display = 'block';
-
-        const ctx = document.getElementById('delayChart').getContext('2d');
-
-        // Destroy existing chart if it exists
-        if (this.chart) {
-            this.chart.destroy();
-        }
-
-        // Prepare chart data
-        const labels = [];
-        const cumulativeData = [];
-        let cumulative = 0;
-
-        for (let i = 0; i < results.delayWeeks; i++) {
-            labels.push(`Week ${i + 1}`);
-            cumulative += results.weeklyLosses[i] || 0;
-            cumulativeData.push(cumulative);
-        }
-
-        // Create chart
-        this.chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Cumulative Cost of Delay',
-                        data: cumulativeData,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3
-                    },
-                    {
-                        label: 'Weekly Loss',
-                        data: results.weeklyLosses,
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        fill: false,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        borderDash: [5, 5]
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Cost Accumulation Over Delay Period',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0
-                                }).format(context.parsed.y);
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        this.chart = createDelayChartHelper(this.chart, results);
     }
 
     addToComparison() {
@@ -1171,255 +833,15 @@ class CostOfDelayCalculator {
     }
 
     updateComparisonView() {
-        if (this.comparisonProjects.length === 0) {
-            document.getElementById('comparisonSection').style.display = 'none';
-            return;
-        }
-
-        document.getElementById('comparisonSection').style.display = 'block';
-
-        // Sort projects by CD3 (highest priority first)
-        const sortedProjects = [...this.comparisonProjects].sort((a, b) => b.cd3 - a.cd3);
-
-        // Initialize runtime selection (select all by default)
-        if (!this.comparisonSelections || this.comparisonSelections.size === 0) {
-            this.comparisonSelections = new Set(sortedProjects.map(p => p.projectName));
-        }
-
-        // Create comparison table with checkboxes
-        this.createComparisonTable(sortedProjects);
-
-        // Build filtered list according to runtime selections
-        const filtered = sortedProjects.filter(p => this.comparisonSelections.has(p.projectName));
-        const toChart = filtered.length > 0 ? filtered : sortedProjects;
-
-        // Create comparison chart only if visuals have been requested
-        if (this.visualsBuilt) {
-            this.createComparisonChart(toChart);
-        }
+        updateComparisonViewHelper(this);
     }
 
     createComparisonTable(projects) {
-        const tableDiv = document.getElementById('comparisonTable');
-        
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(value);
-        };
-
-        let tableHTML = '<div class="comparison-table">';
-
-        // Controls: Select All
-        tableHTML += `<div class="comparison-controls"><label><input type="checkbox" id="comparison-select-all" checked> Select all</label></div>`;
-
-        tableHTML += '<table>';
-        tableHTML += `
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Rank</th>
-                    <th>Project Name</th>
-                    <th>CD3 ($/wk)</th>
-                    <th>Total CoD</th>
-                    <th>Employee Cost</th>
-                    <th>Total Impact</th>
-                    <th>Dev Time</th>
-                    <th>Delay</th>
-                    <th>Team Size</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-        `;
-
-        projects.forEach((project, index) => {
-            const priorityClass = index === 0 ? 'priority-1' : (index === 1 ? 'priority-2' : 'priority-3');
-            const totalImpact = project.totalCostOfDelay + (project.totalDelayCost || 0);
-            
-            tableHTML += `
-                <tr class="${priorityClass}" data-name="${encodeURIComponent(project.projectName)}">
-                    <td><input type="checkbox" class="comparison-select" data-name="${encodeURIComponent(project.projectName)}" ${this.comparisonSelections.has(project.projectName) ? 'checked' : ''}></td>
-                    <td><strong>${index + 1}</strong></td>
-                    <td><strong>${project.projectName}</strong></td>
-                    <td>${formatCurrency(project.cd3)}</td>
-                    <td>${formatCurrency(project.totalCostOfDelay)}</td>
-                    <td>${project.hasEmployeeCosts ? formatCurrency(project.totalDelayCost) : 'N/A'}</td>
-                    <td><strong>${formatCurrency(totalImpact)}</strong></td>
-                    <td>${project.developmentWeeks}w</td>
-                    <td>${project.delayWeeks}w</td>
-                    <td>${project.teamSize || 'N/A'}</td>
-                    <td><span class="delete-project" data-name="${encodeURIComponent(project.projectName)}">×</span></td>
-                </tr>
-            `;
-        });
-
-        tableHTML += '</tbody></table></div>';
-        tableDiv.innerHTML = tableHTML;
-
-        // Wire up controls
-        const selectAll = tableDiv.querySelector('#comparison-select-all');
-        const checkboxes = Array.from(tableDiv.querySelectorAll('.comparison-select'));
-        const deleteBtns = Array.from(tableDiv.querySelectorAll('.delete-project'));
-
-        const rebuild = () => {
-            // update selection set
-            this.comparisonSelections.clear();
-            checkboxes.forEach(cb => {
-                if (cb.checked) this.comparisonSelections.add(decodeURIComponent(cb.dataset.name));
-            });
-
-            // Update header with selected names
-            try {
-                const compSection = document.getElementById('comparisonSection');
-                if (compSection) {
-                    const header = compSection.querySelector('.comparison-header h2');
-                    if (header) {
-                        const names = [...this.comparisonSelections].join(', ');
-                        header.textContent = names.length > 0 ? `Project Comparison — ${names}` : 'Project Comparison';
-                        header.title = names;
-                    }
-                }
-            } catch (e) { console.error(e); }
-
-            // Rebuild chart when visuals are enabled
-            if (this.visualsBuilt) {
-                const sorted = [...this.comparisonProjects].sort((a,b)=>b.cd3-a.cd3);
-                const filtered = sorted.filter(p => this.comparisonSelections.has(p.projectName));
-                const toChart = filtered.length > 0 ? filtered : sorted;
-                this.createComparisonChart(toChart);
-            }
-        };
-
-        if (selectAll) {
-            selectAll.addEventListener('change', (e) => {
-                const checked = e.target.checked;
-                checkboxes.forEach(cb => cb.checked = checked);
-                rebuild();
-            });
-        }
-
-        checkboxes.forEach(cb => cb.addEventListener('change', rebuild));
-
-        deleteBtns.forEach(btn => btn.addEventListener('click', (e) => {
-            const name = decodeURIComponent(btn.dataset.name || btn.getAttribute('data-name'));
-            if (name) this.removeProject(name);
-        }));
+        createComparisonTableHelper(this, projects);
     }
 
     createComparisonChart(projects) {
-        const ctx = document.getElementById('comparisonChart').getContext('2d');
-
-        if (this.comparisonChart) {
-            this.comparisonChart.destroy();
-        }
-
-        const labels = projects.map(p => p.projectName);
-        const cd3Values = projects.map(p => p.cd3);
-        const codValues = projects.map(p => p.totalCostOfDelay);
-        const employeeValues = projects.map(p => p.totalDelayCost || 0);
-
-        this.comparisonChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'CD3 ($/week)',
-                        data: cd3Values,
-                        backgroundColor: 'rgba(37, 99, 235, 0.7)',
-                        borderColor: 'rgba(37, 99, 235, 1)',
-                        borderWidth: 2,
-                        yAxisID: 'y1'
-                    },
-                    {
-                        label: 'Opportunity Cost',
-                        data: codValues,
-                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        borderWidth: 2,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Employee Cost',
-                        data: employeeValues,
-                        backgroundColor: 'rgba(245, 158, 11, 0.7)',
-                        borderColor: 'rgba(245, 158, 11, 1)',
-                        borderWidth: 2,
-                        yAxisID: 'y'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Project Prioritization Comparison (Sorted by CD3)',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0
-                                }).format(context.parsed.y);
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Total Cost ($)'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'CD3 ($/week)'
-                        },
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        this.comparisonChart = createComparisonChartHelper(this.comparisonChart, projects);
     }
 
     removeProject(projectName) {
@@ -1437,28 +859,7 @@ class CostOfDelayCalculator {
     }
 
     exportJson() {
-        if (!this.currentResults) {
-            alert('No results to export');
-            return;
-        }
-
-        const data = {
-            exportDate: new Date().toISOString(),
-            project: this.currentResults,
-            comparison: this.comparisonProjects
-        };
-
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cost-of-delay-${String(this.currentResults.projectName || 'export').replace(/\s+/g, '-')}-${Date.now()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return jsonStr;
+        return exportJsonHelper(this.currentResults, this.comparisonProjects);
     }
 
     generateImages() {
@@ -1467,187 +868,16 @@ class CostOfDelayCalculator {
             return;
         }
 
-        // Use html2canvas to generate images of the results
+        // placeholder behaviour remains
         alert('Generating images of your Cost of Delay analysis...\n\nThis will capture:\n• Cost of Delay Analysis\n• Charts and Visualizations\n• Executive Perspectives\n\nNote: Install html2canvas library for full functionality.');
-        
-        // Future implementation with html2canvas:
-        // html2canvas(document.querySelector('.results-section')).then(canvas => {
-        //     const link = document.createElement('a');
-        //     link.download = `cod-analysis-${this.currentResults.projectName}-${Date.now()}.png`;
-        //     link.href = canvas.toDataURL();
-        //     link.click();
-        // });
     }
 
     exportCsv() {
-        if (this.comparisonProjects.length === 0 && !this.currentResults) {
-            alert('No results to export');
-            return;
-        }
-
-        // Use comparison projects if available, otherwise current result
-        const projects = this.comparisonProjects.length > 0 
-            ? this.comparisonProjects 
-            : [this.currentResults];
-
-        // Sort by CD3
-        const sortedProjects = [...projects].sort((a, b) => b.cd3 - a.cd3);
-
-        // CSV Headers
-        const headers = [
-            'Rank',
-            'Project Name',
-            'CD3 ($/week)',
-            'Total Cost of Delay',
-            'Employee Cost During Delay',
-            'Total Economic Impact',
-            'Development Time (weeks)',
-            'Delay Period (weeks)',
-            'Team Size',
-            'Weekly Value',
-            'Urgency Profile',
-            'Opportunity Cost %'
-        ];
-
-        // Build CSV content
-        let csvContent = headers.join(',') + '\n';
-
-        sortedProjects.forEach((project, index) => {
-            const totalImpact = project.totalCostOfDelay + (project.totalDelayCost || 0);
-            const row = [
-                index + 1,
-                `"${project.projectName}"`,
-                project.cd3.toFixed(2),
-                project.totalCostOfDelay.toFixed(2),
-                (project.totalDelayCost || 0).toFixed(2),
-                totalImpact.toFixed(2),
-                project.developmentWeeks,
-                project.delayWeeks,
-                project.teamSize || 'N/A',
-                project.weeklyValue.toFixed(2),
-                `"${project.urgencyProfile}"`,
-                project.opportunityCost.toFixed(2)
-            ];
-            csvContent += row.join(',') + '\n';
-        });
-
-        // Download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cost-of-delay-analysis-${Date.now()}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return csvContent;
+        return exportCsvHelper(this.currentResults, this.comparisonProjects);
     }
 
     exportExcel() {
-        if (this.comparisonProjects.length === 0 && !this.currentResults) {
-            alert('No results to export');
-            return;
-        }
-
-        // Use comparison projects if available, otherwise current result
-        const projects = this.comparisonProjects.length > 0 
-            ? this.comparisonProjects 
-            : [this.currentResults];
-
-        // Sort by CD3
-        const sortedProjects = [...projects].sort((a, b) => b.cd3 - a.cd3);
-
-        // Create Excel-compatible HTML table
-        let htmlContent = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head>
-                <meta charset="utf-8">
-                <!--[if gte mso 9]>
-                <xml>
-                    <x:ExcelWorkbook>
-                        <x:ExcelWorksheets>
-                            <x:ExcelWorksheet>
-                                <x:Name>Cost of Delay Analysis</x:Name>
-                                <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-                            </x:ExcelWorksheet>
-                        </x:ExcelWorksheets>
-                    </x:ExcelWorkbook>
-                </xml>
-                <![endif]-->
-                <style>
-                    table { border-collapse: collapse; width: 100%; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #2563eb; color: white; font-weight: bold; }
-                    .priority-1 { background-color: #d1fae5; }
-                    .priority-2 { background-color: #fef3c7; }
-                    .priority-3 { background-color: #fee2e2; }
-                    .negative { color: #ef4444; }
-                </style>
-            </head>
-            <body>
-                <h1>Cost of Delay Analysis</h1>
-                <p>Export Date: ${new Date().toLocaleString()}</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Project Name</th>
-                            <th>CD3 ($/week)</th>
-                            <th>Total Cost of Delay</th>
-                            <th>Employee Cost</th>
-                            <th>Total Economic Impact</th>
-                            <th>Dev Time (wks)</th>
-                            <th>Delay (wks)</th>
-                            <th>Team Size</th>
-                            <th>Weekly Value</th>
-                            <th>Urgency Profile</th>
-                            <th>Opportunity Cost %</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        sortedProjects.forEach((project, index) => {
-            const priorityClass = index === 0 ? 'priority-1' : (index === 1 ? 'priority-2' : 'priority-3');
-            const totalImpact = project.totalCostOfDelay + (project.totalDelayCost || 0);
-            
-            htmlContent += `
-                <tr class="${priorityClass}">
-                    <td>${index + 1}</td>
-                    <td>${project.projectName}</td>
-                    <td>$${project.cd3.toLocaleString()}</td>
-                    <td class="negative">($${project.totalCostOfDelay.toLocaleString()})</td>
-                    <td class="negative">${project.hasEmployeeCosts ? '($' + project.totalDelayCost.toLocaleString() + ')' : 'N/A'}</td>
-                    <td class="negative">($${totalImpact.toLocaleString()})</td>
-                    <td>${project.developmentWeeks}</td>
-                    <td>${project.delayWeeks}</td>
-                    <td>${project.teamSize || 'N/A'}</td>
-                    <td>$${project.weeklyValue.toLocaleString()}</td>
-                    <td>${project.urgencyProfile}</td>
-                    <td>${project.opportunityCost.toFixed(1)}%</td>
-                </tr>
-            `;
-        });
-
-        htmlContent += `
-                    </tbody>
-                </table>
-            </body>
-            </html>
-        `;
-
-        // Download as Excel file
-        const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cost-of-delay-analysis-${Date.now()}.xls`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return htmlContent;
+        return exportExcelHelper(this.currentResults, this.comparisonProjects);
     }
 
     printReport() {
