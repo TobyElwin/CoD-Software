@@ -8,7 +8,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const PORT = 8765;
 const ROOT = path.resolve(__dirname, '..');
 
 const MIME = {
@@ -72,7 +71,7 @@ function getSystemChromePath() {
   return null;
 }
 
-async function run() {
+async function run(port) {
   let Puppeteer;
   try {
     Puppeteer = require('puppeteer');
@@ -106,13 +105,19 @@ async function run() {
     allLogs.push(text);
     if (text.startsWith('Jasmine:') || text.includes('FAILED') || text.includes('Expected')) failures.push(text);
   });
-  await page.goto(`http://127.0.0.1:${PORT}/test-suite/test-runner-headless.html`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+  await page.goto(`http://127.0.0.1:${port}/test-suite/test-runner-headless.html`, { waitUntil: 'domcontentloaded', timeout: 15000 });
   await page.addScriptTag({ path: path.join(ROOT, 'cost-of-delay-calculator.js') });
   await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/chart.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine-html.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot0.min.js' });
-  await page.addScriptTag({ path: path.join(ROOT, 'test-suite', 'tests', 'acceptance-tests.js') });
+  const testsDir = path.join(ROOT, 'test-suite', 'tests');
+  const specFiles = fs.readdirSync(testsDir)
+    .filter((name) => name.endsWith('.js'))
+    .sort();
+  for (const spec of specFiles) {
+    await page.addScriptTag({ path: path.join(testsDir, spec) });
+  }
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot1.min.js' });
   await page.waitForSelector('.jasmine-results .jasmine-bar', { timeout: 30000 }).catch(() => null);
   await new Promise((r) => setTimeout(r, 2000));
@@ -136,8 +141,9 @@ async function run() {
   return { failedCount, summary, failureDetails, failures, allLogs };
 }
 
-server.listen(PORT, '127.0.0.1', async () => {
-  const { failedCount, summary, failureDetails, failures, allLogs } = await run();
+server.listen(0, '127.0.0.1', async () => {
+  const { port } = server.address();
+  const { failedCount, summary, failureDetails, failures, allLogs } = await run(port);
   server.close();
   console.log(summary || 'Tests completed.');
   if (failureDetails.length) {

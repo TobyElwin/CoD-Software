@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cost of Delay Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="cost-of-delay-styles.css">
 </head>
 <body>
@@ -24,29 +25,19 @@
 
             <div class="info-grid-compact">
                 <div class="info-item">
-                    <h3>🚨 Delay Matters</h3>
+                    <h3>What is Cost of Delay?</h3>
+                    <p>CoD estimates the financial impact of delay. It represents the value lost over time due to project delays—not just direct expenses but also revenue erosion, missed opportunities, and weakened competitive positioning.</p>
+                    <p class="highlight">Ignoring CoD leads to poor prioritization. Without CoD, teams focus on projects that "feel urgent" rather than those with sooner financial impact.</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>Delay Matters</h3>
                     <p><strong>Two companies, same feature, different outcomes:</strong></p>
                     <ul>
                         <li><strong>Company A</strong> delivers today—wins early adopters, locks in market share, generates revenue from day one</li>
                         <li><strong>Company B</strong> waits 3 months—customers frustrated, competitors fill the gap, higher costs</li>
                     </ul>
                     <p>The difference? Lost revenue and sacrificed opportunities that only competitors are too willing to fill.</p>
-                </div>
-
-                <div class="info-item">
-                    <h3>⚡ Urgency Profiles</h3>
-                    <ul>
-                        <li><strong>Standard:</strong> Value accrues linearly over time</li>
-                        <li><strong>Expedite:</strong> High initial value, decreases rapidly</li>
-                        <li><strong>Fixed Date:</strong> Deadline-driven with severe penalties</li>
-                        <li><strong>Intangible:</strong> Low immediate value, grows over time</li>
-                    </ul>
-                </div>
-
-                <div class="info-item">
-                    <h3>💰 What is Cost of Delay?</h3>
-                    <p>CoD estimates the financial impact of delay. It represents the value lost over time due to project delays—not just direct expenses but also revenue erosion, missed opportunities, and weakened competitive positioning.</p>
-                    <p class="highlight">Ignoring CoD leads to poor prioritization. Without CoD, teams focus on projects that "feel urgent" rather than those with sooner financial impact.</p>
                 </div>
             </div>
         </div>
@@ -127,9 +118,15 @@
 
                     <div class="form-group">
                         <label for="urgencyProfile">
-                            Urgency Profile
-                            <span class="tooltip">ⓘ
-                                <span class="tooltiptext">How value changes over time: Linear, Decreasing, Deadline-based, or Growing</span>
+                            Comparative Urgency
+                            <span class="tooltip urgency-tooltip">ⓘ
+                                <span class="tooltiptext urgency-tooltiptext">
+                                    <strong>How value changes over time:</strong><br><br>
+                                    <strong>Standard (Linear):</strong> Value accrues steadily over time<br><br>
+                                    <strong>Expedite (High urgency):</strong> High initial value, decreases rapidly<br><br>
+                                    <strong>Fixed Date (Deadline):</strong> Deadline-driven with severe penalties<br><br>
+                                    <strong>Intangible (Low urgency):</strong> Low immediate value, grows over time
+                                </span>
                             </span>
                         </label>
                         <select id="urgencyProfile">
@@ -197,24 +194,28 @@
                         </label>
                         <input type="number" id="benefitsMultiplier" value="1.5" min="1" max="3" step="0.1">
                     </div>
+
+                    <!-- Estimate Button Section -->
+                    <div class="form-group estimate-button-group">
+                        <div class="all-action-buttons">
+                            <button id="calculateBtn" class="btn-cta btn-primary-cta">Estimate Cost of Delay</button>
+                            <button id="addToPortfolioBtn" class="btn-cta btn-portfolio-cta" style="display: none;">Add to Portfolio</button>
+                            <button id="addToComparisonBtn" class="btn-cta btn-secondary-cta" style="display: none;">Add to Comparison</button>
+                            <button id="buildVisualsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Build Visuals</button>
+                            <button id="saveAsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Save As...</button>
+                            <button id="loadFromFileBtn" class="btn-cta btn-secondary-cta">Load From File</button>
+                            <button id="printResultsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Print Results</button>
+                            <input type="file" id="fileInput" accept=".json" style="display: none;">
+                        </div>
+                    </div>
                 </div>
             </div>
             </div>
 
-            <!-- Column 3: Estimate -->
+            <!-- Column 3: Results -->
             <div class="card estimate-section">
-            <h2>Estimate</h2>
+            <h2>Analysis Results</h2>
             <div class="estimate-content">
-                <p class="estimate-prompt">Complete the fields and click the button below to calculate the cost of delay.</p>
-                
-                <button id="calculateBtn" class="btn-primary btn-large">Estimate Cost of Delay</button>
-                
-                <div id="estimateActions" style="display: none;">
-                    <button id="addToComparisonBtn" class="btn-secondary btn-full">Add to Comparison</button>
-                    <button id="saveAsBtn" class="btn-secondary btn-full">Save As...</button>
-                    <button id="loadFromFileBtn" class="btn-secondary btn-full">Load From File</button>
-                    <input type="file" id="fileInput" accept=".json" style="display: none;">
-                </div>
                 
                 <div id="quickStats" class="quick-stats" style="display: none;">
                     <h3>Quick Stats</h3>
@@ -239,25 +240,50 @@
                     <h2>Cost of Delay Analysis</h2>
                     <div class="header-actions" id="headerActions" style="display: none;">
                         <div class="dropdown">
-                            <button class="btn-action" id="exportDropdownBtn">Export ▼</button>
-                            <div class="dropdown-content" id="exportDropdown">
+                            <button class="btn-action" id="exportDropdownBtn" aria-haspopup="true" aria-expanded="false">Export ▼</button>
+                            <div class="dropdown-content" id="exportDropdown" role="menu">
                                 <a href="#" id="exportCsvBtn">Export as CSV</a>
                                 <a href="#" id="exportExcelBtn">Export as Excel (.xls)</a>
                                 <a href="#" id="exportJsonBtn">Export as JSON</a>
                             </div>
                         </div>
                         <button class="btn-action" id="generateImagesBtn">Generate Images</button>
+                        <button class="btn-action" id="clearHistoryBtn" style="display: none;">Clear History</button>
                     </div>
                 </div>
                 
-                <div id="results" class="results-content">
+                <!-- Cumulative Summary (appears after first calculation) -->
+                <div id="cumulativeSummary" class="cumulative-summary" style="display: none;">
+                    <h3>Cumulative Analysis Summary</h3>
+                    <div class="cumulative-metrics">
+                        <div class="cumulative-metric">
+                            <div class="cumulative-label">Total Calculations</div>
+                            <div class="cumulative-value" id="totalCalculations">0</div>
+                        </div>
+                        <div class="cumulative-metric">
+                            <div class="cumulative-label">Combined CoD</div>
+                            <div class="cumulative-value" id="combinedCod">$0</div>
+                        </div>
+                        <div class="cumulative-metric">
+                            <div class="cumulative-label">Average CD3</div>
+                            <div class="cumulative-value" id="avgCd3">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Calculation History (additive results) -->
+                <div id="calculationHistory" class="calculation-history">
                     <p class="placeholder">Enter project details and click Calculate to see results</p>
+                </div>
+
+                <div id="results" class="results-content">
+                    <p class="placeholder">Calculation results will appear here</p>
                 </div>
 
                 <div id="cdppSection" class="cdpp-section" style="display: none;">
                     <h3>CD3 - Cost of Delay Divided by Duration</h3>
                     <div class="cdpp-value"></div>
-                    <p class="cdpp-explanation">This metric helps prioritize projects. Higher CD3 = Higher Priority</p>
+                    <p class="cdpp-explanation"><strong>What is CD3?</strong> CD3 (Cost of Delay Divided by Duration) is a prioritization metric from the Weighted Shortest Job First (WSJF) framework. It calculates the economic value delivered per unit of time invested. Higher CD3 = Higher Priority = Better ROI per week of work.</p>
                 </div>
 
                 <div id="employeeCostSection" class="employee-cost-section" style="display: none;">
@@ -267,14 +293,26 @@
 
                 <!-- Executive Perspectives -->
                 <div id="executivePerspectives" class="executive-perspectives" style="display: none;">
-                    <h3>Executive Impact Analysis</h3>
+                    <div class="executive-header">
+                        <h3>Executive Impact Analysis</h3>
+                        <div class="executive-header-actions">
+                            <button id="exportExecutiveBtn" class="btn-small">Export Combined</button>
+                        </div>
+                    </div>
                     <div class="executive-tabs">
-                        <button class="executive-tab active" data-tab="cfo">CFO Perspective</button>
+                        <button class="executive-tab active" data-tab="ceo">CEO Perspective</button>
+                        <button class="executive-tab" data-tab="cfo">CFO Perspective</button>
                         <button class="executive-tab" data-tab="cmo">CMO Perspective</button>
+                        <button class="executive-tab" data-tab="cto">CTO Perspective</button>
                         <button class="executive-tab" data-tab="coo">COO Perspective</button>
                     </div>
 
-                    <div id="cfo-content" class="executive-content active">
+                    <div id="ceo-content" class="executive-content active">
+                        <h3>Chief Executive Officer Perspective</h3>
+                        <div id="ceo-analysis"></div>
+                    </div>
+
+                    <div id="cfo-content" class="executive-content">
                         <h3>Chief Financial Officer Perspective</h3>
                         <div id="cfo-analysis"></div>
                     </div>
@@ -284,9 +322,22 @@
                         <div id="cmo-analysis"></div>
                     </div>
 
+                    <div id="cto-content" class="executive-content">
+                        <h3>Chief Technology Officer Perspective</h3>
+                        <div id="cto-analysis"></div>
+                    </div>
+
                     <div id="coo-content" class="executive-content">
                         <h3>Chief Operations Officer Perspective</h3>
                         <div id="coo-analysis"></div>
+                    </div>
+                </div>
+
+                <!-- Overview Section: Integrated risk/opportunity summary -->
+                <div id="overviewSection" class="card overview-section" style="display: none; margin-top: 12px;">
+                    <h3>Overview — Integrated Risk & Opportunity</h3>
+                    <div id="overviewContent">
+                        <p class="placeholder">Overview will appear here after calculation.</p>
                     </div>
                 </div>
             </div>
@@ -316,19 +367,69 @@
             </div>
         </div>
 
-        <!-- Additional Information Section -->
+        <!-- Portfolio Management Section -->
+        <div id="portfolioSection" class="card portfolio-section" style="display: none;">
+            <div class="portfolio-header">
+                <h2>Project/Product Portfolio</h2>
+                <div class="portfolio-actions">
+                    <button id="clearPortfolioBtn" class="btn-secondary">Clear Portfolio</button>
+                    <button id="exportPortfolioBtn" class="btn-secondary">Export Portfolio</button>
+                </div>
+            </div>
+
+            <!-- Portfolio Overview -->
+            <div id="portfolioOverview" class="portfolio-overview">
+                <h3>Portfolio Overview</h3>
+                <div class="portfolio-metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Projects</div>
+                        <div class="metric-value" id="portfolioCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Portfolio CoD</div>
+                        <div class="metric-value" id="portfolioTotalCod">$0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Average CD3</div>
+                        <div class="metric-value" id="portfolioAvgCd3">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Weekly Impact</div>
+                        <div class="metric-value" id="portfolioWeeklyImpact">$0/week</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Comparison Chart -->
+            <div class="portfolio-chart-container">
+                <h3>Portfolio Comparison (Prioritized by CD3)</h3>
+                <canvas id="portfolioComparisonChart"></canvas>
+            </div>
+
+            <!-- Individual Projects -->
+            <div id="portfolioProjects" class="portfolio-projects">
+                <h3>Individual Projects</h3>
+                <div id="projectCards" class="project-cards"></div>
+            </div>
+        </div>
+
+        <!-- Additional Information Section - Always at Bottom -->
         <div class="card info-section">
             <h2>Additional Resources</h2>
             
             <div class="info-grid">
                 <div class="info-item">
-                    <h3>🎯 CD3 Prioritization</h3>
-                    <p>CD3 (Cost of Delay Divided by Duration) helps prioritize work using <strong>Weighted Shortest Job First (WSJF)</strong> methodology. It identifies projects that deliver the most value per unit of time invested.</p>
-                    <p>Higher CD3 = Higher Priority = Faster ROI</p>
+                    <h3>Further Resources <span class="subtitle-text">- practical overview</span></h3>
+                    <p><a href="https://tobyelwin.com/cost-of-confusion-success-expense" target="_blank" rel="noopener noreferrer" class="primary-resource">Cost of Confusion</a></p>
+                    <ol class="resource-links">
+                        <li><a href="https://tobyelwin.com/cost-of-delay-financial-impact" target="_blank" rel="noopener noreferrer">Cost of Delay</a></li>
+                        <li><a href="https://tobyelwin.com/switching-costs-hidden-tax-on-change" target="_blank" rel="noopener noreferrer">Switching Cost</a></li>
+                        <li><a href="https://tobyelwin.com/opportunity-cost-value" target="_blank" rel="noopener noreferrer">Opportunity Cost</a></li>
+                    </ol>
                 </div>
 
                 <div class="info-item">
-                    <h3>⚠️ Cost of Confusion</h3>
+                    <h3>Cost of Confusion</h3>
                     <p><strong>Common delays stem from:</strong></p>
                     <ul>
                         <li><strong>Unclear Prioritization:</strong> Teams debate instead of execute</li>
@@ -339,7 +440,7 @@
                 </div>
 
                 <div class="info-item">
-                    <h3>✅ Take Action</h3>
+                    <h3>Take Action</h3>
                     <p><strong>Minimize delay by:</strong></p>
                     <ul>
                         <li><strong>Prioritizing High-Value Work:</strong> Focus where speed impacts revenue</li>
@@ -352,7 +453,51 @@
         </div>
     </div>
 
+    <!-- Floating Navigation Buttons -->
+    <div class="floating-nav-buttons">
+        <button id="scrollToTopBtn" class="scroll-btn" title="Jump to Project/Product Information">
+            New Project Info
+        </button>
+        <button id="scrollToExecutiveBtn" class="scroll-btn" title="Jump to Executive Impact Analysis">
+            Executive Analysis
+        </button>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Load-time instrumentation: capture errors and console.error calls for debugging
+        window.__loadErrors = [];
+        window.addEventListener('error', function (e) {
+            try {
+                window.__loadErrors.push({ type: 'error', message: e.message, filename: e.filename, lineno: e.lineno, colno: e.colno, stack: e.error && e.error.stack });
+            } catch (err) { /* ignore */ }
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            try { window.__loadErrors.push({ type: 'unhandledrejection', reason: String(e.reason), stack: e.reason && e.reason.stack }); } catch (err) {}
+        });
+        (function(){
+            const orig = console.error;
+            console.error = function(){
+                try { window.__loadErrors.push({ type: 'console.error', args: Array.from(arguments).map(a => (a && a.stack) || String(a)) }); } catch (e) {}
+                orig.apply(console, arguments);
+            };
+        })();
+    </script>
     <script src="cost-of-delay-calculator.js"></script>
+    <script>
+        // Scroll button functionality
+        document.getElementById('scrollToTopBtn').addEventListener('click', function() {
+            document.querySelector('.input-section-full').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        
+        document.getElementById('scrollToExecutiveBtn').addEventListener('click', function() {
+            const execSection = document.getElementById('executivePerspectives');
+            if (execSection && execSection.style.display !== 'none') {
+                execSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                alert('Calculate a project first to view Executive Impact Analysis');
+            }
+        });
+    </script>
 </body>
 </html>

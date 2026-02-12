@@ -7,12 +7,16 @@ This directory contains all automated tests for the Cost of Delay Calculator app
 ```
 test-suite/
 ├── tests/                      # Test specifications
-│   └── acceptance-tests.js     # ATDD/BDD acceptance tests (21 test cases)
+│   ├── acceptance-tests.js     # Core acceptance tests
+│   └── atdd-bdd-debugging-tests.js
 ├── features/                   # Gherkin feature files
 │   ├── cost-of-delay.feature
 │   └── comprehensive-e2e-tests.feature
 ├── run-tests.js               # Headless test runner (Puppeteer)
 ├── run-tests-browser.js       # Browser-based test runner
+├── validate-ui-interactions.js # UI/module interaction smoke validation
+├── open-app.js                 # Local app launcher for manual testing
+├── ATDD-BDD-STANDARDS.md       # Simple debugging standards checklist
 ├── test-runner.html           # HTML test runner (with UI)
 ├── test-runner-headless.html  # Headless HTML runner
 ├── validation-test.html       # Manual validation tests
@@ -30,9 +34,9 @@ npm test
 ```
 
 This executes:
-- 7 test suites (Reliability, Interoperability, Scalability, Observability, Business Logic, UI/UX, etc.)
-- 21 test cases
-- Full ATDD/BDD coverage
+- All specs in `test-suite/tests/*.js`
+- Core acceptance tests and BDD debugging scenario tests
+- Full ATDD/BDD coverage for supported automated scenarios
 
 **Requirements:** Node.js, Puppeteer (already installed via `package.json`)
 
@@ -45,10 +49,30 @@ Open tests in your default browser (no Puppeteer required):
 npm run test:browser
 ```
 
-This opens `test-runner.html` at `http://127.0.0.1:8766` where you can:
+This opens `test-runner.html` on an auto-assigned localhost port where you can:
 - See test results in real-time
 - Debug failing tests in browser DevTools
 - View detailed test output
+
+---
+
+### UI Module Interaction Validation
+Run lightweight UI/module interaction checks against the real HTML interface:
+
+```bash
+npm run validate:ui
+```
+
+---
+
+### Manual App Launch
+Launch the full app interface for end-user testing:
+
+```bash
+npm start
+```
+
+This opens `cost-of-delay-calculator.html` on an auto-assigned localhost port.
 
 ---
 
@@ -132,8 +156,7 @@ Common issues:
 ## 🔧 Test Configuration
 
 ### Test Runner Configuration
-- **Port (Headless):** 8765
-- **Port (Browser):** 8766
+- **Port Allocation:** Dynamic (auto-assigned free localhost port)
 - **Timeout:** 30 seconds for test completion
 - **Browser:** Chrome (via Puppeteer or system default)
 
@@ -145,7 +168,7 @@ Common issues:
 
 ## 📝 Writing New Tests
 
-To add new tests, edit `tests/acceptance-tests.js`:
+To add new tests, create or edit files in `tests/`:
 
 ```javascript
 describe('Your Test Suite', () => {
@@ -158,8 +181,9 @@ describe('Your Test Suite', () => {
 
 Follow these principles:
 - **Test-First Design:** Write tests before implementation
-- **BDD Style:** Use descriptive test names ("should do X when Y")
+- **BDD Style:** Prefer `Given/When/Then` sentence names
 - **RISO Principles:** Cover Reliability, Interoperability, Scalability, Observability
+- **Standards Checklist:** Follow `ATDD-BDD-STANDARDS.md`
 
 ## 🚀 CI/CD Integration
 
