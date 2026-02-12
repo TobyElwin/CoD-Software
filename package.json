@@ -4,7 +4,11 @@
   "description": "Cost of Delay Calculator - ATDD test suite",
   "scripts": {
     "test": "node test-suite/run-tests.js",
-    "test:browser": "node test-suite/run-tests-browser.js"
+    "test:atdd": "npm test",
+    "test:bdd": "npm run validate:ui",
+    "test:browser": "node test-suite/run-tests-browser.js",
+    "validate:ui": "node test-suite/validate-ui-interactions.js",
+    "start": "node test-suite/open-app.js"
   },
   "private": true,
   "devDependencies": {

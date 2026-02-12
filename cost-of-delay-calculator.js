@@ -7,6 +7,8 @@ class CostOfDelayCalculator {
         this.comparisonChart = null;
         this.currentResults = null;
         this.comparisonProjects = [];
+        this.comparisonSelections = new Set(); // runtime-only selection of projects for comparison
+        this.visualsBuilt = false;
         console.log('🔧 Initializing event listeners...');
         try {
             this.initializeEventListeners();
@@ -57,6 +59,18 @@ class CostOfDelayCalculator {
             console.log('✅ Export CSV button listener attached');
         } else {
             console.error('❌ Export CSV button not found');
+        }
+
+        // Export combined executive analysis
+        const exportExecutiveBtn = document.getElementById('exportExecutiveBtn');
+        if (exportExecutiveBtn) {
+            exportExecutiveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exportExecutiveAnalysis();
+            });
+            console.log('✅ Export Combined (Executive) button listener attached');
+        } else {
+            console.error('❌ Export Combined (Executive) button not found');
         }
 
         const exportExcelBtn = document.getElementById('exportExcelBtn');
@@ -117,6 +131,13 @@ class CostOfDelayCalculator {
                 tab.addEventListener('click', (e) => this.switchExecutiveTab(e.target.dataset.tab));
             });
             console.log(`✅ ${executiveTabs.length} Executive tab listeners attached`);
+        }
+
+        // Build Visuals button (user-triggered chart generation)
+        const buildVisualsBtn = document.getElementById('buildVisualsBtn');
+        if (buildVisualsBtn) {
+            buildVisualsBtn.addEventListener('click', () => this.buildVisuals());
+            console.log('✅ Build Visuals button listener attached');
         }
 
         // Add salary type toggle
@@ -256,13 +277,21 @@ class CostOfDelayCalculator {
         // Display results
         this.displayResults(projectName, combinedResults);
         
-        // Create visualization
-        this.createChart(combinedResults);
+        // Create visualization only if visuals have been requested by the user
+        if (this.visualsBuilt) {
+            this.createChart(combinedResults);
+        } else {
+            const buildBtn = document.getElementById('buildVisualsBtn');
+            if (buildBtn) buildBtn.style.display = 'inline-block';
+        }
 
         // Show action buttons and output note
-        document.getElementById('estimateActions').style.display = 'flex';
-        document.getElementById('headerActions').style.display = 'flex';
-        document.getElementById('outputNote').style.display = 'block';
+        const estActionsEl = document.getElementById('estimateActions');
+        if (estActionsEl) estActionsEl.style.display = 'flex';
+        const headerActionsEl = document.getElementById('headerActions');
+        if (headerActionsEl) headerActionsEl.style.display = 'flex';
+        const outputNoteEl = document.getElementById('outputNote');
+        if (outputNoteEl) outputNoteEl.style.display = 'block';
 
         // Update quick stats
         this.updateQuickStats(combinedResults);
@@ -285,6 +314,20 @@ class CostOfDelayCalculator {
         document.getElementById('quickImpact').innerHTML = `<span class="negative-value">${formatCurrency(totalImpact)}</span>`;
         
         document.getElementById('quickStats').style.display = 'block';
+    }
+
+    buildVisuals() {
+        this.visualsBuilt = true;
+        const buildBtn = document.getElementById('buildVisualsBtn');
+        if (buildBtn) buildBtn.style.display = 'none';
+
+        if (this.currentResults) {
+            try { this.createChart(this.currentResults); } catch (e) { console.error('Error creating delay chart:', e); }
+        }
+
+        if (this.comparisonProjects && this.comparisonProjects.length > 0) {
+            try { this.createComparisonChart([...this.comparisonProjects].sort((a,b)=>b.cd3-a.cd3)); } catch (e) { console.error('Error creating comparison chart:', e); }
+        }
     }
 
     saveAs() {
@@ -714,6 +757,8 @@ class CostOfDelayCalculator {
 
         // Generate and display executive perspectives
         this.generateExecutivePerspectives(results);
+        // Also populate the integrated Overview card
+        try { this.generateOverview(results); } catch (e) { console.error('Error generating overview:', e); }
     }
 
     generateExecutivePerspectives(results) {
@@ -732,6 +777,44 @@ class CostOfDelayCalculator {
 
         const totalImpact = results.totalCostOfDelay + (results.totalDelayCost || 0);
         const delayMonths = (results.delayWeeks / 4.33).toFixed(1);
+
+        // CEO Perspective
+        const ceoAnalysis = document.getElementById('ceo-analysis');
+        if (ceoAnalysis) {
+            ceoAnalysis.innerHTML = `
+            <div class="impact-highlight">
+                <strong>Executive Summary:</strong>
+                <p>${results.projectName} has an estimated total economic impact of ${formatCurrency(totalImpact)} due to a ${results.delayWeeks}-week delay.</p>
+            </div>
+            <h4>Strategic Implications</h4>
+            <p>The delay affects top-line growth and market timing. Each week recovered returns ${formatCurrency(results.weeklyValue)} in potential value.</p>
+            <div class="recommendation-box">
+                <strong>CEO Recommendation:</strong>
+                <p>Evaluate this initiative relative to portfolio CD3 values; accelerate or remove blockers for high-impact items.</p>
+            </div>
+            `;
+        }
+
+        // CTO Perspective
+        const ctoAnalysis = document.getElementById('cto-analysis');
+        if (ctoAnalysis) {
+            ctoAnalysis.innerHTML = `
+            <div class="impact-highlight">
+                <strong>Technology & Delivery Impact:</strong>
+                <p>Delay of ${results.delayWeeks} weeks increases technical risk and may compound technical debt if rushed.</p>
+            </div>
+            <h4>Engineering Considerations</h4>
+            <ul>
+                <li>Assess critical-path dependencies and technical blockers.</li>
+                <li>Consider scope reduction or parallelization to shorten delivery.</li>
+                <li>Protect quality — avoid rushed work that increases rework.</li>
+            </ul>
+            <div class="recommendation-box">
+                <strong>CTO Recommendation:</strong>
+                <p>Prioritize technical impediments and enable the team with clear decisions and required resources.</p>
+            </div>
+            `;
+        }
 
         // CFO Perspective
         const cfoAnalysis = document.getElementById('cfo-analysis');
@@ -884,6 +967,75 @@ class CostOfDelayCalculator {
         `;
     }
 
+    generateOverview(results) {
+        const overviewEl = document.getElementById('overviewSection');
+        const contentEl = document.getElementById('overviewContent');
+        if (!overviewEl || !contentEl) return;
+
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(Math.abs(value));
+        };
+
+        const totalImpact = results.totalCostOfDelay + (results.totalDelayCost || 0);
+        const lines = [];
+        lines.push(`<p><strong>${results.projectName}</strong> — ${results.developmentWeeks}w dev, ${results.delayWeeks}w delay.</p>`);
+        lines.push(`<p><strong>Total Cost of Delay:</strong> ${formatCurrency(results.totalCostOfDelay)} &nbsp; <strong>CD3:</strong> ${formatCurrency(results.cd3)} /wk</p>`);
+        if (results.hasEmployeeCosts) {
+            lines.push(`<p><strong>Team Burn:</strong> ${results.teamSize} × ${formatCurrency(results.teamWeeklyCost)} per week → ${formatCurrency(results.totalDelayCost)} while delayed.</p>`);
+        }
+        lines.push(`<p><strong>Total Economic Impact:</strong> ${formatCurrency(totalImpact)}</p>`);
+
+        // Recommendations (brief)
+        const recs = [];
+        recs.push('Prioritize based on CD3 to maximize value recovered per week.');
+        if (results.urgencyProfile === 'expedite') recs.push('Expedite: consider immediate resource allocation or scope reduction.');
+        if (results.urgencyProfile === 'fixed-date') recs.push('Fixed-date: identify critical-path dependencies and negotiate deadlines.');
+        if (results.hasEmployeeCosts) recs.push('Evaluate reallocation or temporary scaling to reduce delay weeks.');
+        recs.push('Consider incremental delivery to capture partial value earlier.');
+
+        lines.push('<h4>Recommendations</h4>');
+        lines.push('<ul>' + recs.map(r => `<li>${r}</li>`).join('') + '</ul>');
+
+        contentEl.innerHTML = lines.join('\n');
+        overviewEl.style.display = 'block';
+    }
+
+    exportExecutiveAnalysis() {
+        try {
+            const parts = [];
+            const header = `Executive Combined Analysis - ${new Date().toLocaleString()}\nProject: ${this.currentResults ? this.currentResults.projectName : 'N/A'}\n\n`;
+            parts.push(header);
+
+            const overview = document.getElementById('overviewContent');
+            if (overview) parts.push('Overview:\n' + overview.innerText + '\n\n');
+
+            const ids = ['ceo-analysis','cfo-analysis','cmo-analysis','cto-analysis','coo-analysis'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const title = el.closest('.executive-content')?.querySelector('h3')?.textContent || id;
+                    parts.push((title ? title + ':\n' : '') + el.innerText + '\n\n');
+                }
+            });
+
+            const text = parts.join('\n');
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `executive-analysis-${(this.currentResults && this.currentResults.projectName ? this.currentResults.projectName.replace(/\s+/g,'-') : 'analysis')}-${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('✅ Executive analysis exported');
+            return text;
+        } catch (e) {
+            console.error('Error exporting executive analysis:', e);
+            alert('❌ Error exporting executive analysis. Check console for details.');
+        }
+    }
+
     switchExecutiveTab(tabName) {
         // Update tab buttons
         document.querySelectorAll('.executive-tab').forEach(tab => {
@@ -1029,11 +1181,22 @@ class CostOfDelayCalculator {
         // Sort projects by CD3 (highest priority first)
         const sortedProjects = [...this.comparisonProjects].sort((a, b) => b.cd3 - a.cd3);
 
-        // Create comparison table
+        // Initialize runtime selection (select all by default)
+        if (!this.comparisonSelections || this.comparisonSelections.size === 0) {
+            this.comparisonSelections = new Set(sortedProjects.map(p => p.projectName));
+        }
+
+        // Create comparison table with checkboxes
         this.createComparisonTable(sortedProjects);
-        
-        // Create comparison chart
-        this.createComparisonChart(sortedProjects);
+
+        // Build filtered list according to runtime selections
+        const filtered = sortedProjects.filter(p => this.comparisonSelections.has(p.projectName));
+        const toChart = filtered.length > 0 ? filtered : sortedProjects;
+
+        // Create comparison chart only if visuals have been requested
+        if (this.visualsBuilt) {
+            this.createComparisonChart(toChart);
+        }
     }
 
     createComparisonTable(projects) {
@@ -1048,10 +1211,16 @@ class CostOfDelayCalculator {
             }).format(value);
         };
 
-        let tableHTML = '<div class="comparison-table"><table>';
+        let tableHTML = '<div class="comparison-table">';
+
+        // Controls: Select All
+        tableHTML += `<div class="comparison-controls"><label><input type="checkbox" id="comparison-select-all" checked> Select all</label></div>`;
+
+        tableHTML += '<table>';
         tableHTML += `
             <thead>
                 <tr>
+                    <th></th>
                     <th>Rank</th>
                     <th>Project Name</th>
                     <th>CD3 ($/wk)</th>
@@ -1072,7 +1241,8 @@ class CostOfDelayCalculator {
             const totalImpact = project.totalCostOfDelay + (project.totalDelayCost || 0);
             
             tableHTML += `
-                <tr class="${priorityClass}">
+                <tr class="${priorityClass}" data-name="${encodeURIComponent(project.projectName)}">
+                    <td><input type="checkbox" class="comparison-select" data-name="${encodeURIComponent(project.projectName)}" ${this.comparisonSelections.has(project.projectName) ? 'checked' : ''}></td>
                     <td><strong>${index + 1}</strong></td>
                     <td><strong>${project.projectName}</strong></td>
                     <td>${formatCurrency(project.cd3)}</td>
@@ -1082,13 +1252,62 @@ class CostOfDelayCalculator {
                     <td>${project.developmentWeeks}w</td>
                     <td>${project.delayWeeks}w</td>
                     <td>${project.teamSize || 'N/A'}</td>
-                    <td><span class="delete-project" onclick="calculator.removeProject('${project.projectName}')">×</span></td>
+                    <td><span class="delete-project" data-name="${encodeURIComponent(project.projectName)}">×</span></td>
                 </tr>
             `;
         });
 
         tableHTML += '</tbody></table></div>';
         tableDiv.innerHTML = tableHTML;
+
+        // Wire up controls
+        const selectAll = tableDiv.querySelector('#comparison-select-all');
+        const checkboxes = Array.from(tableDiv.querySelectorAll('.comparison-select'));
+        const deleteBtns = Array.from(tableDiv.querySelectorAll('.delete-project'));
+
+        const rebuild = () => {
+            // update selection set
+            this.comparisonSelections.clear();
+            checkboxes.forEach(cb => {
+                if (cb.checked) this.comparisonSelections.add(decodeURIComponent(cb.dataset.name));
+            });
+
+            // Update header with selected names
+            try {
+                const compSection = document.getElementById('comparisonSection');
+                if (compSection) {
+                    const header = compSection.querySelector('.comparison-header h2');
+                    if (header) {
+                        const names = [...this.comparisonSelections].join(', ');
+                        header.textContent = names.length > 0 ? `Project Comparison — ${names}` : 'Project Comparison';
+                        header.title = names;
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            // Rebuild chart when visuals are enabled
+            if (this.visualsBuilt) {
+                const sorted = [...this.comparisonProjects].sort((a,b)=>b.cd3-a.cd3);
+                const filtered = sorted.filter(p => this.comparisonSelections.has(p.projectName));
+                const toChart = filtered.length > 0 ? filtered : sorted;
+                this.createComparisonChart(toChart);
+            }
+        };
+
+        if (selectAll) {
+            selectAll.addEventListener('change', (e) => {
+                const checked = e.target.checked;
+                checkboxes.forEach(cb => cb.checked = checked);
+                rebuild();
+            });
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', rebuild));
+
+        deleteBtns.forEach(btn => btn.addEventListener('click', (e) => {
+            const name = decodeURIComponent(btn.dataset.name || btn.getAttribute('data-name'));
+            if (name) this.removeProject(name);
+        }));
     }
 
     createComparisonChart(projects) {
