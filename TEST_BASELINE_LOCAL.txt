@@ -1,0 +1,18 @@
+Thu Feb 12 13:29:04 EST 2026
+
+> cost-of-delay-calculator@1.0.0 test
+> node test-suite/run-tests.js
+
+Tests completed.
+
+> cost-of-delay-calculator@1.0.0 validate:ui
+> node test-suite/validate-ui-interactions.js
+
+TimeoutError: Waiting failed: 15000ms exceeded
+    at new WaitTask (/Users/tobyelwin/dev/CoD-Software/node_modules/puppeteer-core/lib/cjs/puppeteer/common/WaitTask.js:48:34)
+    at IsolatedWorld.waitForFunction (/Users/tobyelwin/dev/CoD-Software/node_modules/puppeteer-core/lib/cjs/puppeteer/api/Realm.js:25:26)
+    at CdpFrame.waitForFunction (/Users/tobyelwin/dev/CoD-Software/node_modules/puppeteer-core/lib/cjs/puppeteer/api/Frame.js:571:43)
+    at CdpFrame.<anonymous> (/Users/tobyelwin/dev/CoD-Software/node_modules/puppeteer-core/lib/cjs/puppeteer/util/decorators.js:109:27)
+    at CdpPage.waitForFunction (/Users/tobyelwin/dev/CoD-Software/node_modules/puppeteer-core/lib/cjs/puppeteer/api/Page.js:1434:37)
+    at run (/Users/tobyelwin/dev/CoD-Software/test-suite/validate-ui-interactions.js:108:14)
+    at async Server.<anonymous> (/Users/tobyelwin/dev/CoD-Software/test-suite/validate-ui-interactions.js:151:5)

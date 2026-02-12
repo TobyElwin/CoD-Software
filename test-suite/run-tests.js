@@ -5,9 +5,13 @@
  * is available. Requires: npm install puppeteer (or npx puppeteer browsers install chrome).
  * Alternative: npm run test:browser (no Puppeteer; opens runner in your browser).
  */
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 
 const MIME = {
@@ -48,7 +52,6 @@ function getSystemChromePath() {
       '/Applications/Chromium.app/Contents/MacOS/Chromium',
       process.env.PUPPETEER_EXECUTABLE_PATH
     ].filter(Boolean);
-    const fs = require('fs');
     for (const p of paths) {
       try {
         if (fs.existsSync(p)) return p;
@@ -61,7 +64,6 @@ function getSystemChromePath() {
       process.env.PROGRAMFILES + '\\Google\\Chrome\\Application\\chrome.exe',
       process.env.PUPPETEER_EXECUTABLE_PATH
     ].filter(Boolean);
-    const fs = require('fs');
     for (const p of paths) {
       try {
         if (p && fs.existsSync(p)) return p;
@@ -74,10 +76,11 @@ function getSystemChromePath() {
 async function run(port) {
   let Puppeteer;
   try {
-    Puppeteer = require('puppeteer');
+    Puppeteer = await import('puppeteer');
+    Puppeteer = Puppeteer.default || Puppeteer;
   } catch (e) {
     console.error('Puppeteer not installed. Run: npm install puppeteer');
-    process.exit(2);
+    process.exit(1);
   }
   const launchOpts = { headless: 'new' };
   const systemChrome = getSystemChromePath();
@@ -106,8 +109,9 @@ async function run(port) {
     if (text.startsWith('Jasmine:') || text.includes('FAILED') || text.includes('Expected')) failures.push(text);
   });
   await page.goto(`http://127.0.0.1:${port}/test-suite/test-runner-headless.html`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-  await page.addScriptTag({ path: path.join(ROOT, 'cost-of-delay-calculator.js') });
-  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/chart.js' });
+  // load the calculator module rather than plain script
+  await page.addScriptTag({ path: path.join(ROOT, 'cost-of-delay-calculator.js'), type: 'module' });
+  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine-html.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot0.min.js' });
@@ -116,7 +120,8 @@ async function run(port) {
     .filter((name) => name.endsWith('.js'))
     .sort();
   for (const spec of specFiles) {
-    await page.addScriptTag({ path: path.join(testsDir, spec) });
+    // load each spec as a module to support ES imports
+    await page.addScriptTag({ path: path.join(testsDir, spec), type: 'module' });
   }
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot1.min.js' });
   await page.waitForSelector('.jasmine-results .jasmine-bar', { timeout: 30000 }).catch(() => null);

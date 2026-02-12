@@ -47,6 +47,9 @@
             <p>💡 <strong>Complete the fields below, then click Calculate.</strong> Output and analysis will display below the calculator.</p>
         </div>
 
+        <!-- Error message placeholder -->
+        <div id="errorMessage" class="error-message" style="display:none;"></div>
+
         <!-- Four Column Layout Container -->
         <div class="four-column-container">
             <!-- Column 1: Project/Product Information -->
@@ -55,10 +58,23 @@
                 <!-- Left Column: Project/Product Information -->
                 <div class="input-column">
                     <h2>Project/Product Information</h2>
+
+                    <div class="form-group">
+                        <label>
+                            Select Initiative
+                            <span class="tooltip">ⓘ
+                                <span class="tooltiptext">Choose whether this entry is a project or a product</span>
+                            </span>
+                        </label>
+                        <div class="checkbox-option-row">
+                            <label class="checkbox-option"><input type="checkbox" id="itemTypeProject" checked> Project</label>
+                            <label class="checkbox-option"><input type="checkbox" id="itemTypeProduct"> Product</label>
+                        </div>
+                    </div>
                     
                     <div class="form-group">
                         <label for="projectName">
-                            Project Name
+                            Name
                             <span class="tooltip">ⓘ
                                 <span class="tooltiptext">A descriptive name for your project or initiative</span>
                             </span>
@@ -87,8 +103,39 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="weeklyValue">
-                            Expected Revenue or Cost Savings Per Week ($)
+                        <div class="value-type-header-row">
+                            <label>
+                                Value Type
+                                <span class="tooltip">ⓘ
+                                    <span class="tooltiptext">Choose whether weekly value represents revenue or cost savings</span>
+                                </span>
+                            </label>
+                            <label for="currencyCode">Currency Code</label>
+                        </div>
+                        <div class="value-type-controls">
+                            <div class="checkbox-option-row">
+                                <label class="checkbox-option"><input type="checkbox" id="valueTypeRevenue" checked> Revenue</label>
+                                <label class="checkbox-option"><input type="checkbox" id="valueTypeCostSavings"> Cost Savings</label>
+                            </div>
+                            <div class="currency-inline-group">
+                                <select id="currencyCode">
+                                    <option value="USD">USD - United States Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="CAD">CAD - Canadian Dollar</option>
+                                    <option value="AUD">AUD - Australian Dollar</option>
+                                    <option value="JPY">JPY - Japanese Yen</option>
+                                    <option value="INR">INR - Indian Rupee</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="currency-helper-text">Use one consistent currency code across options to keep comparison accurate.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weeklyValue" id="weeklyValueLabel">
+                            <span id="weeklyValueLabelText">Expected Revenue Per Week (in selected currency)</span>
                             <span class="tooltip">ⓘ
                                 <span class="tooltiptext">Expected revenue gain or cost savings per week once delivered</span>
                             </span>
@@ -140,24 +187,25 @@
 
                 <!-- Right Column: Team Cost Parameters -->
                 <div class="input-column">
-                    <h2>Team Cost Parameters</h2>
+                    <h2>Cost Pramaters</h2>
 
                     <div class="form-group">
-                        <label for="salaryType">
+                        <label>
                             Salary Input Type
                             <span class="tooltip">ⓘ
                                 <span class="tooltiptext">Choose whether to enter annual salary or hourly rate</span>
                             </span>
                         </label>
-                        <select id="salaryType">
-                            <option value="annual">Annual Salary</option>
-                            <option value="hourly">Hourly Rate</option>
-                        </select>
+                        <div class="checkbox-option-row">
+                            <label class="checkbox-option"><input type="checkbox" id="salaryTypeAnnual" checked> Annual</label>
+                            <label class="checkbox-option"><input type="checkbox" id="salaryTypeHourly"> Hourly</label>
+                        </div>
+                        <p id="salaryTypeHelperText" class="salary-type-helper" style="display: none;"></p>
                     </div>
 
                     <div class="form-group" id="annualSalaryGroup">
                         <label for="annualSalary">
-                            Average Annual Salary ($)
+                            Average Annual Salary
                             <span class="tooltip">ⓘ
                                 <span class="tooltiptext">Average base annual salary per team member (before benefits)</span>
                             </span>
@@ -167,7 +215,7 @@
 
                     <div class="form-group" id="hourlyRateGroup" style="display: none;">
                         <label for="hourlyRate">
-                            Average Hourly Rate ($)
+                            Average Hourly Rate
                             <span class="tooltip">ⓘ
                                 <span class="tooltiptext">Average base hourly rate per team member (before benefits)</span>
                             </span>
@@ -195,15 +243,22 @@
                         <input type="number" id="benefitsMultiplier" value="1.5" min="1" max="3" step="0.1">
                     </div>
 
+                    <div class="form-group">
+                        <label for="annualizedEstimate" id="annualizedEstimateLabel">
+                            Annualized Revenue/Savings Estimate
+                        </label>
+                        <input type="text" id="annualizedEstimate" value="$0" readonly>
+                    </div>
+
                     <!-- Estimate Button Section -->
                     <div class="form-group estimate-button-group">
                         <div class="all-action-buttons">
                             <button id="calculateBtn" class="btn-cta btn-primary-cta">Estimate Cost of Delay</button>
-                            <button id="addToPortfolioBtn" class="btn-cta btn-portfolio-cta" style="display: none;">Add to Portfolio</button>
-                            <button id="addToComparisonBtn" class="btn-cta btn-secondary-cta" style="display: none;">Add to Comparison</button>
+                            <button id="addToComparisonBtn" class="btn-cta btn-secondary-cta">Add a Project/Product</button>
+                            <button id="loadFromFileBtn" class="btn-cta btn-secondary-cta">Load From File</button>
+                            <button id="autofillDemoBtn" class="btn-cta btn-secondary-cta">Autofill 3 Demo Projects</button>
                             <button id="buildVisualsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Build Visuals</button>
                             <button id="saveAsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Save As...</button>
-                            <button id="loadFromFileBtn" class="btn-cta btn-secondary-cta">Load From File</button>
                             <button id="printResultsBtn" class="btn-cta btn-secondary-cta" style="display: none;">Print Results</button>
                             <input type="file" id="fileInput" accept=".json" style="display: none;">
                         </div>
@@ -273,7 +328,6 @@
                 
                 <!-- Calculation History (additive results) -->
                 <div id="calculationHistory" class="calculation-history">
-                    <p class="placeholder">Enter project details and click Calculate to see results</p>
                 </div>
 
                 <div id="results" class="results-content">
@@ -456,14 +510,14 @@
     <!-- Floating Navigation Buttons -->
     <div class="floating-nav-buttons">
         <button id="scrollToTopBtn" class="scroll-btn" title="Jump to Project/Product Information">
-            New Project Info
+            Add<br>Initiative
         </button>
         <button id="scrollToExecutiveBtn" class="scroll-btn" title="Jump to Executive Impact Analysis">
-            Executive Analysis
+            Executive<br>Analysis
         </button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script>
         // Load-time instrumentation: capture errors and console.error calls for debugging
         window.__loadErrors = [];
@@ -483,7 +537,7 @@
             };
         })();
     </script>
-    <script src="cost-of-delay-calculator.js"></script>
+    <script type="module" src="cost-of-delay-calculator.js"></script>
     <script>
         // Scroll button functionality
         document.getElementById('scrollToTopBtn').addEventListener('click', function() {

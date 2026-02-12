@@ -36,20 +36,19 @@
     <!-- Tooltip for UI test -->
     <span class="tooltip">ⓘ<span class="tooltiptext">Expected revenue gain or cost savings per week once delivered</span></span>
 
-    <script src="../cost-of-delay-calculator.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script type="module" src="../cost-of-delay-calculator.js"></script>
     
     <!-- Wait for scripts to load, then load Jasmine -->
     <script>
-        // Ensure CostOfDelayCalculator is globally accessible
-        window.CostOfDelayCalculator = CostOfDelayCalculator;
-        console.log('✅ CostOfDelayCalculator available:', typeof CostOfDelayCalculator);
+        // CostOfDelayCalculator will set window.CostOfDelayCalculator within module
+        console.log('ℹ️ ensuring calculator class is available after module load');
     </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine-html.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot1.min.js"></script>
-    <script src="tests/acceptance-tests.js"></script>
+    <script type="module" src="tests/acceptance-tests.js"></script>
 </body>
 </html>

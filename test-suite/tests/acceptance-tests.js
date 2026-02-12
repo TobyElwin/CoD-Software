@@ -8,6 +8,14 @@
  * - Reliability, Interoperability, Scalability, Observability (RISO)
  */
 
+import { CostOfDelayCalculator } from '../../cost-of-delay-calculator.js';
+import { computeStandardLosses, computeExpediteLosses, computeFixedDateLosses, computeIntangibleLosses } from '../../src/calculations.js';
+
+// ensure global reference for older code
+if (typeof globalThis !== 'undefined' && !globalThis.CostOfDelayCalculator) {
+    globalThis.CostOfDelayCalculator = CostOfDelayCalculator;
+}
+
 describe('Cost of Delay Calculator - Acceptance Tests', () => {
     let calculator;
     const CostOfDelayCalculatorClass = typeof CostOfDelayCalculator !== 'undefined' ? CostOfDelayCalculator : (typeof window !== 'undefined' && window.CostOfDelayCalculator) || (typeof globalThis !== 'undefined' && globalThis.CostOfDelayCalculator);
@@ -243,6 +251,32 @@ describe('Cost of Delay Calculator - Acceptance Tests', () => {
             
             expect(annualSalary).toBe(156000);
         });
+
+        it('should throw when development weeks is zero', () => {
+            expect(() => calculator.calculateCostOfDelay(1000, 0, 5, 'standard'))
+                .toThrowError(/developmentWeeks must be greater than zero/);
+        });
+
+        it('should provide utility functions for each urgency profile', () => {
+            const std = calculator.calculateCostOfDelay(100, 10, 3, 'standard');
+            const helper = calculator.calculateCostOfDelay; // can't directly access helpers here
+            // Instead import compute functions at top, but easier is to run via module import
+            const { computeStandardLosses, computeExpediteLosses, computeFixedDateLosses, computeIntangibleLosses } = require('../../src/calculations.js');
+
+            const s = computeStandardLosses(200, 4);
+            expect(s.totalCostOfDelay).toBe(800);
+            expect(s.weeklyLosses).toEqual([200,200,200,200]);
+
+            const e = computeExpediteLosses(100, 3);
+            expect(e.weeklyLosses.length).toBe(3);
+            expect(e.peakWeeklyLoss).toBeCloseTo(e.weeklyLosses[0]);
+
+            const f = computeFixedDateLosses(50, 5);
+            expect(f.weeklyLosses[0]).toBeLessThan(f.weeklyLosses[4]);
+
+            const i = computeIntangibleLosses(80, 4);
+            expect(i.weeklyLosses[0]).toBeLessThan(i.weeklyLosses[3]);
+        });
     });
 
     describe('UI/UX Tests', () => {
@@ -273,6 +307,32 @@ describe('Cost of Delay Calculator - Acceptance Tests', () => {
             
             expect(document.getElementById('hourlyRateGroup').style.display).toBe('block');
             expect(document.getElementById('annualSalaryGroup').style.display).toBe('none');
+        });
+
+        it('should show inline error message when inputs are invalid', () => {
+            document.getElementById('weeklyValue').value = '';
+            document.getElementById('developmentWeeks').value = '0';
+            document.getElementById('delayWeeks').value = '2';
+            calculator.calculate();
+            const err = document.getElementById('errorMessage');
+            expect(err.style.display).not.toBe('none');
+            expect(err.textContent).toMatch(/greater than 0/);
+            // underline the bad fields
+            expect(document.getElementById('weeklyValue').classList.contains('input-error')).toBe(true);
+            expect(document.getElementById('developmentWeeks').classList.contains('input-error')).toBe(true);
+        });
+
+        it('should flag negative team size and delay', () => {
+            document.getElementById('weeklyValue').value = '50000';
+            document.getElementById('developmentWeeks').value = '5';
+            document.getElementById('delayWeeks').value = '-1';
+            document.getElementById('teamSize').value = '-3';
+            calculator.calculate();
+            const err = document.getElementById('errorMessage');
+            expect(err.style.display).not.toBe('none');
+            expect(err.textContent).toMatch(/cannot be negative/);
+            expect(document.getElementById('delayWeeks').classList.contains('input-error')).toBe(true);
+            expect(document.getElementById('teamSize').classList.contains('input-error')).toBe(true);
         });
     });
 

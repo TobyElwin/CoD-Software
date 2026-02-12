@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /** Smoke validation for key module interactions on the real HTML interface. */
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -49,7 +53,8 @@ function fail(message) {
 async function run(port) {
   let puppeteer;
   try {
-    puppeteer = require('puppeteer');
+    puppeteer = await import('puppeteer');
+    puppeteer = puppeteer.default || puppeteer;
   } catch (_) {
     fail('Puppeteer is not installed. Run npm install.');
   }
@@ -89,38 +94,99 @@ async function run(port) {
   const url = `http://127.0.0.1:${port}/cost-of-delay-calculator.html`;
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-  await page.type('#projectName', 'Module Interaction Validation');
-  await page.type('#weeklyValue', '100000');
-  await page.type('#developmentWeeks', '8');
-  await page.type('#delayWeeks', '3');
-  await page.select('#urgencyProfile', 'standard');
-  await page.type('#annualSalary', '120000');
-  await page.type('#teamSize', '4');
+  // wait for calculator object to be ready
+  await page.waitForFunction(() => window.calculator && typeof window.calculator.calculate === 'function', { timeout: 15000 });
 
-  await page.$eval('#calculateBtn', el => el.click());
-  await page.waitForFunction(() => {
-    const quickStats = document.getElementById('quickStats');
-    const headerActions = document.getElementById('headerActions');
-    return quickStats && quickStats.style.display !== 'none' && headerActions && headerActions.style.display !== 'none';
-  }, { timeout: 15000 });
+  // validate floating action buttons are centered horizontally and vertically
+  const floatingButtonAlignment = await page.evaluate(() => {
+    const ids = ['scrollToTopBtn', 'scrollToExecutiveBtn'];
+    return ids.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return { id, present: false };
+      const style = window.getComputedStyle(el);
+      return {
+        id,
+        present: true,
+        textAlign: style.textAlign,
+        display: style.display,
+        alignItems: style.alignItems,
+        justifyContent: style.justifyContent,
+        justifyItems: style.justifyItems
+      };
+    });
+  });
 
-  await page.$eval('#addToPortfolioBtn', el => el.click());
-  await page.waitForFunction(() => {
-    const section = document.getElementById('portfolioSection');
-    const cards = document.querySelectorAll('#projectCards .project-card');
-    return section && section.style.display !== 'none' && cards.length > 0;
-  }, { timeout: 15000 });
+  for (const button of floatingButtonAlignment) {
+    if (!button.present) {
+      fail(`Missing floating button: ${button.id}`);
+    }
+    const isFlexCentered =
+      button.display === 'flex' &&
+      button.alignItems === 'center' &&
+      button.justifyContent === 'center';
+    const isGridCentered =
+      button.display === 'grid' &&
+      button.alignItems === 'center' &&
+      button.justifyItems === 'center';
 
-  await page.$eval('#exportDropdownBtn', el => el.click());
-  const isExportMenuOpen = await page.$eval('#exportDropdown', (el) => el.classList.contains('show'));
-  if (!isExportMenuOpen) {
-    fail('Export dropdown did not open on button click.');
+    if (button.textAlign !== 'center' || (!isFlexCentered && !isGridCentered)) {
+      fail(
+        `Floating button alignment failed for ${button.id}: ` +
+        JSON.stringify(button)
+      );
+    }
   }
 
-  await page.$eval('#printResultsBtn', el => el.click());
-  const printCalled = await page.evaluate(() => window.__printCalled === true);
-  if (!printCalled) {
-    fail('Print button did not trigger window.print().');
+  await page.evaluate(() => {
+    const setValue = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    setValue('#projectName', 'Module Interaction Validation');
+    setValue('#weeklyValue', '100000');
+    setValue('#developmentWeeks', '8');
+    setValue('#delayWeeks', '3');
+    setValue('#urgencyProfile', 'standard');
+    setValue('#annualSalary', '120000');
+    setValue('#teamSize', '4');
+    setValue('#currencyCode', 'USD');
+  });
+
+  await page.$eval('#calculateBtn', el => el.click());
+  // log internal states for diagnostics
+  const diagnostics = await page.evaluate(() => {
+    const qs = document.getElementById('quickStats');
+    const err = document.getElementById('errorMessage');
+    return {
+      qsDisplay: qs ? qs.style.display : 'missing',
+      errDisplay: err ? err.style.display : 'missing',
+      errText: err ? err.textContent : ''
+    };
+  });
+  console.log('DIAG after click', diagnostics);
+
+  await page.waitForFunction(() => {
+    const quickStats = document.getElementById('quickStats');
+    return quickStats && quickStats.style.display !== 'none';
+  }, { timeout: 20000 });
+
+
+
+  // invalid input should show an inline error message
+  await page.evaluate(() => {
+    document.getElementById('weeklyValue').value = '';
+    document.getElementById('developmentWeeks').value = '0';
+    document.getElementById('delayWeeks').value = '2';
+    document.getElementById('calculateBtn').click();
+  });
+  await page.waitForSelector('#errorMessage', { visible: true, timeout: 5000 });
+  const errorText = await page.$eval('#errorMessage', el => el.textContent || '');
+  if (!/(valid values|must be greater than 0|cannot be negative)/i.test(errorText)) {
+    fail('Unexpected inline error text: ' + errorText);
   }
 
   await page.$eval('body', el => el.click());

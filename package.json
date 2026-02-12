@@ -8,10 +8,13 @@
     "test:bdd": "npm run validate:ui",
     "test:browser": "node test-suite/run-tests-browser.js",
     "validate:ui": "node test-suite/validate-ui-interactions.js",
-    "start": "node test-suite/open-app.js"
+    "start": "node test-suite/open-app.js",
+    "bdd:smoke": "cucumber-js"
   },
+  "type": "module",
   "private": true,
   "devDependencies": {
+    "@cucumber/cucumber": "^12.6.0",
     "jasmine-browser-runner": "^4.0.0",
     "jasmine-core": "^6.0.1",
     "puppeteer": "^23.0.0"

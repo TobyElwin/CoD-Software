@@ -99,14 +99,23 @@ Total Impact = Cost of Delay + Employee Costs During Delay
 
 ```
 CoD Software/
-├── cost-of-delay-calculator.html    # Main HTML interface
-├── cost-of-delay-styles.css          # Styling and responsive design
-├── cost-of-delay-calculator.js       # Core calculation logic
-├── features/
-│   └── cost-of-delay.feature         # BDD/Gherkin test scenarios
-├── tests/
-│   └── acceptance-tests.js           # ATDD test suite
-└── README.md                          # This file
+├── cost-of-delay-calculator.html    # Main HTML interface (loads JS as module)
+├── cost-of-delay-styles.css         # Styling and responsive design
+├── cost-of-delay-calculator.js      # Entry-point class (ES module)
+├── src/                             # Modular JavaScript helpers
+│   ├── calculations.js              # CoD and employee cost logic
+│   ├── formatters.js                # Currency and value formatting
+│   ├── exporters.js                 # CSV/Excel/JSON export functions
+│   └── fileIO.js                    # Save/load utilities
+├── features/                        # BDD/Gherkin scenarios
+│   └── cost-of-delay.feature
+├── test-suite/                      # ATDD testing infrastructure
+│   ├── tests/
+│   │   ├── acceptance-tests.js
+│   │   └── atdd-bdd-debugging-tests.js
+│   ├── run-tests.js
+│   └── ...other support files...
+└── README.md                        # This file
 ```
 
 ## Design Principles

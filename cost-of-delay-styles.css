@@ -86,6 +86,24 @@ header h1 {
     border-left: 4px solid var(--warning-color);
 }
 
+/* Inline error messaging */
+.error-message {
+    background-color: #ffe6e6;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Highlight invalid form fields */
+.input-error {
+    border: 1px solid var(--danger-color) !important;
+    background-color: #ffecec;
+}
+
 .helper-text p {
     margin: 0;
     font-size: 0.85rem;
@@ -442,6 +460,73 @@ header h1 {
     font-size: 0.85rem;
 }
 
+.checkbox-option-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.value-type-controls {
+    display: grid;
+    grid-template-columns: 1fr minmax(200px, 260px);
+    gap: 12px;
+    align-items: end;
+}
+
+.value-type-header-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(200px, 260px);
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 4px;
+}
+
+.value-type-header-row label {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+}
+
+.currency-inline-group label {
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+}
+
+.currency-helper-text {
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.salary-type-helper {
+    margin-top: 6px;
+    margin-bottom: 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.salary-type-helper.warning {
+    color: #b45309;
+    font-weight: 600;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.checkbox-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+}
+
 .form-group input,
 .form-group select {
     width: 100%;
@@ -617,6 +702,13 @@ header h1 {
     min-height: 200px;
 }
 
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
 .placeholder {
     text-align: center;
     color: var(--text-secondary);
@@ -630,6 +722,10 @@ header h1 {
     background: var(--background);
     border-radius: 8px;
     border-left: 4px solid var(--primary-color);
+}
+
+.metrics-grid .metric {
+    margin-bottom: 0;
 }
 
 .metric-label {
@@ -815,6 +911,48 @@ header h1 {
     margin-bottom: 8px;
     font-size: 0.9rem;
     line-height: 1.5;
+}
+
+.executive-two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.executive-col {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.executive-col h4 {
+    margin-top: 0;
+}
+
+.executive-col-qualitative {
+    border-left: 4px solid var(--primary-color);
+}
+
+.executive-col-quantitative {
+    border-left: 4px solid var(--secondary-color);
+}
+
+.exec-kpi-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.exec-kpi-list li {
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 0;
+    margin: 0;
+}
+
+.exec-kpi-list li:last-child {
+    border-bottom: none;
 }
 
 .impact-highlight {
@@ -1221,18 +1359,16 @@ header h1 {
     background: var(--text-primary);
 }
 
-/* All CTA Buttons in One Row */
+/* Team cost action buttons (2x2 for primary four actions) */
 .all-action-buttons {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     margin-top: 16px;
-    justify-content: space-between;
 }
 
 .btn-cta {
-    flex: 1;
-    min-width: 140px;
+    min-width: 0;
     border: none;
     padding: 12px 12px;
     border-radius: 6px;
@@ -1278,12 +1414,7 @@ header h1 {
 }
 
 @media (max-width: 1200px) {
-    .all-action-buttons {
-        flex-wrap: wrap;
-    }
-    
     .btn-cta {
-        min-width: 120px;
         font-size: 0.85rem;
         padding: 10px 8px;
     }
@@ -1291,8 +1422,7 @@ header h1 {
 
 @media (max-width: 768px) {
     .all-action-buttons {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
     }
     
     .btn-cta {
@@ -1303,27 +1433,34 @@ header h1 {
 /* Floating Navigation Buttons */
 .floating-nav-buttons {
     position: fixed;
-    right: 20px;
-    top: 50%;
+    right: 14px;
+    top: 66%;
+    bottom: auto;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 1000;
+    gap: 8px;
+    z-index: 200;
 }
 
 .scroll-btn {
-    background: linear-gradient(180deg, #34d399, var(--secondary-color));
+    background: linear-gradient(180deg, #047857, #065f46);
     color: white;
     border: none;
-    padding: 10px 14px;
+    width: 96px;
+    min-height: 52px;
+    padding: 6px 8px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    box-shadow: 0 6px 0 rgba(16,185,129,0.14), 0 12px 18px rgba(16,185,129,0.18);
+    box-shadow: 0 6px 0 rgba(5, 94, 70, 0.2), 0 12px 18px rgba(6, 95, 70, 0.24);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
-    white-space: nowrap;
+    white-space: pre-line;
+    line-height: 1.1;
+    text-align: center;
+    display: grid;
+    place-items: center;
     background-clip: padding-box;
     text-shadow: 0 1px 0 rgba(0,0,0,0.08);
 }
@@ -1339,13 +1476,23 @@ header h1 {
 }
 
 @media (max-width: 768px) {
+    .value-type-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .value-type-header-row {
+        grid-template-columns: 1fr;
+    }
+
     .floating-nav-buttons {
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
+        position: static;
+        transform: none;
+        margin-top: 12px;
+        align-items: flex-end;
     }
     
     .scroll-btn {
+        width: auto;
         padding: 8px 10px;
         font-size: 0.7rem;
     }
@@ -1592,6 +1739,12 @@ header h1 {
     margin-top: 8px;
 }
 
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .input-grid {
@@ -1611,6 +1764,14 @@ header h1 {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+    }
+
+    .executive-two-column {
+        grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
     }
 
     .header-actions {
@@ -1710,7 +1871,19 @@ header h1 {
 
 .comparison-chart-container {
     margin-top: 24px;
-    max-height: 400px;
+    position: relative;
+    height: 420px;
+}
+
+#comparisonChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .comparison-chart-container {
+        height: 320px;
+    }
 }
 
 .delete-project {

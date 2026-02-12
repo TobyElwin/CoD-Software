@@ -1,0 +1,5 @@
+
+> cost-of-delay-calculator@1.0.0 test
+> node test-suite/run-tests.js
+
+Tests completed.
