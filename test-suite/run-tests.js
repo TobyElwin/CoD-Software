@@ -111,7 +111,7 @@ async function run(port) {
   await page.goto(`http://127.0.0.1:${port}/test-suite/test-runner-headless.html`, { waitUntil: 'domcontentloaded', timeout: 15000 });
   // load the calculator module rather than plain script
   await page.addScriptTag({ path: path.join(ROOT, 'cost-of-delay-calculator.js'), type: 'module' });
-  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/chart.js' });
+  await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/jasmine-html.min.js' });
   await page.addScriptTag({ url: 'https://cdnjs.cloudflare.com/ajax/libs/jasmine/3.99.0/boot0.min.js' });

@@ -105,6 +105,12 @@ export function createComparisonChart(existingChart, projects) {
     const cd3Values = projects.map(p => p.cd3);
     const codValues = projects.map(p => p.totalCostOfDelay);
     const employeeValues = projects.map(p => p.totalDelayCost || 0);
+    const compactCurrency = (value) => {
+        const abs = Math.abs(value);
+        if (abs >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+        if (abs >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+        return '$' + value.toLocaleString();
+    };
 
     return new Chart(ctx, {
         type: 'bar',
@@ -139,7 +145,15 @@ export function createComparisonChart(existingChart, projects) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 8,
+                    right: 12,
+                    bottom: 8,
+                    left: 8
+                }
+            },
             plugins: {
                 legend: {
                     position: 'top',
@@ -170,6 +184,13 @@ export function createComparisonChart(existingChart, projects) {
                 }
             },
             scales: {
+                x: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 40,
+                        minRotation: 0
+                    }
+                },
                 y: {
                     type: 'linear',
                     display: true,
@@ -180,7 +201,7 @@ export function createComparisonChart(existingChart, projects) {
                     },
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return compactCurrency(value);
                         }
                     }
                 },
@@ -197,7 +218,7 @@ export function createComparisonChart(existingChart, projects) {
                     },
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return compactCurrency(value);
                         }
                     }
                 }
